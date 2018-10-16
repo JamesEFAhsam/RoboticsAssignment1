@@ -8,8 +8,14 @@ import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.GraphicsLCD;
+import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.internal.ev3.EV3LED;
+import lejos.robotics.chassis.Chassis;
+import lejos.robotics.chassis.Wheel;
+import lejos.robotics.chassis.WheeledChassis;
+import lejos.robotics.localization.OdometryPoseProvider;
+import lejos.robotics.navigation.MovePilot;
 
 public class ColorSensor {
 	
@@ -24,7 +30,9 @@ public class ColorSensor {
 	
 	private LCDRenderer screen;
 	private ColorSensorMonitor colorSensor;
-	EV3LED led;
+	private EV3LED led;
+	private MovePilot pilot;
+	private OdometryPoseProvider opp;
 	
 	public static void main(String[] args){
 		ColorSensor cs = new ColorSensor();
@@ -42,6 +50,7 @@ public class ColorSensor {
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 		
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 10);
+		setUpRobot();
 				
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
@@ -49,6 +58,17 @@ public class ColorSensor {
 		colorSensor.start();
 		
 		
+	}
+	
+	private void setUpRobot(){
+		Wheel leftWheel = WheeledChassis.modelWheel(Motor.B, 4.05).offset(-4.9);
+		Wheel rightWheel = WheeledChassis.modelWheel(Motor.D, 4.05).offset(4.9);
+
+		Chassis myChassis = new WheeledChassis( new Wheel[]{leftWheel, rightWheel}, WheeledChassis.TYPE_DIFFERENTIAL);
+		pilot = new MovePilot(myChassis);
+
+		// Create a pose provider and link it to the move pilot
+		opp = new OdometryPoseProvider(pilot);
 	}
 	
 	public void closeProgram(){
@@ -62,7 +82,7 @@ public class ColorSensor {
 			//screen.clearScreen();
 			//screen.writeTo(new String[]{"F? "+(colorSensor.getColorFrequency() != null)});
 			
-			
+			pilot.forward();
 			
 			Button.waitForAnyPress();
 		}
