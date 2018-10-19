@@ -7,6 +7,7 @@ import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -16,6 +17,10 @@ import lejos.robotics.chassis.Wheel;
 import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
+import net.robotics.map.Map;
+import net.robotics.screen.LCDRenderer;
+import net.robotics.sensor.ColorSensorMonitor;
+import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 
 public class ColorSensor {
 	
@@ -33,6 +38,7 @@ public class ColorSensor {
 	private EV3LED led;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
+	private Map map;
 	
 	public static void main(String[] args){
 		ColorSensor cs = new ColorSensor();
@@ -54,7 +60,9 @@ public class ColorSensor {
 				
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
-		colorSensor.configure();
+		this.map = new Map(6, 7);
+		
+		colorSensor.configure(true);
 		colorSensor.start();
 		
 		
@@ -77,14 +85,57 @@ public class ColorSensor {
 	}
 	
 	public void mainLoop(){
-		while(!Button.ESCAPE.isDown()){
+		int squares = 0;
+		ColorNames prevColor = colorSensor.getColor();
+
+		pilot.setLinearSpeed(10);
+		
+		screen.clearScreen();
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+
+		while(!Button.ESCAPE.isDown() && squares < 6){
+			screen.clearScreen();
+			if(map.canMove(map.getRobotX(), map.getRobotY()+2)){
+				MoveSquares(2);
+				map.moveRobotPos(0, 2);
+			}
+			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+			
+			
 			
 			//screen.clearScreen();
 			//screen.writeTo(new String[]{"F? "+(colorSensor.getColorFrequency() != null)});
 			
-			pilot.forward();
+			
+			
+			/*if(colorSensor.getCurrentColor() == ColorNames.BLACK && prevColor != ColorNames.BLACK){
+				squares++;
+			}
+			
+			if(colorSensor.getCurrentColor() != prevColor){
+				prevColor = colorSensor.getCurrentColor();
+			}
+			
+			screen.clearScreen();
+			screen.writeTo(new String[]{"Passed through "+squares+" squares.",
+					"Color. " + colorSensor.getCurrentColor(),
+					"Previous. " + prevColor
+					}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, Font.getSmallFont());
+			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
+			*/
 			
 			Button.waitForAnyPress();
+		}
+	}
+	
+	private void MoveSquares(int i){
+		for (int j = 0; j < i; j++) {
+			pilot.forward();
+			ColorNames cn;
+			do{
+				cn = colorSensor.getCurrentColor();
+			}while(cn != ColorNames.BLACK);
+			pilot.travel(10f);
 		}
 	}
 	
