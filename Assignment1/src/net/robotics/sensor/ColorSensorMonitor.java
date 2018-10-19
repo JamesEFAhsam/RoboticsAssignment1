@@ -1,4 +1,4 @@
-package net.robotics.main;
+package net.robotics.sensor;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,6 +9,8 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.sensor.EV3ColorSensor;
+import net.robotics.main.ColorSensor;
+import net.robotics.screen.LCDRenderer;
 
 public class ColorSensorMonitor extends Thread{
 	
@@ -167,7 +169,7 @@ public class ColorSensorMonitor extends Thread{
 		
 		
 		while(true){
-			if(pastStrings.size() < 15){
+			if(pastStrings.size() < 8){
 				currentColor = ColorNames.UNKNOWN;
 				
 				ColorNames key = getColor();
@@ -182,7 +184,11 @@ public class ColorSensorMonitor extends Thread{
 				if(frequency.containsKey(key)){
 					pastStrings.push(key);
 					int modified = frequency.get(key);
-					modified++;
+					if(key == ColorNames.BLACK){
+						modified+=2;
+					}else{
+						modified++;
+					}
 					frequency.put(key, modified);
 				}
 			} else {
@@ -192,12 +198,20 @@ public class ColorSensorMonitor extends Thread{
 				}
 				pastStrings.push(key);
 				int modified = frequency.get(key);
-				modified++;
+				if(key == ColorNames.BLACK){
+					modified+=2;
+				}else{
+					modified++;
+				}
 				frequency.put(key, modified);
 				
 				key = pastStrings.pollLast();
-				modified = frequency.get(key);
-				modified--;
+					modified = frequency.get(key);
+					if(key == ColorNames.BLACK){
+						modified-=2;
+					}else{
+						modified--;
+					}
 				frequency.put(key, modified);
 				
 				
@@ -213,27 +227,6 @@ public class ColorSensorMonitor extends Thread{
 				
 				currentColor = color;
 			}
-			
-			//screen.clearScreen();
-			
-			screen.writeTo(new String[]{
-					"Reading: " + getCurrentColor(),
-			}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
-			
-			String[] freq = new String[ColorNames.values().length-1];
-			int i = 0;
-			for (ColorNames names : ColorNames.values()) {
-				if(names == ColorNames.UNKNOWN){
-					continue;
-				}
-				
-				freq[i] = names.toString().charAt(0) + ": " + frequency.get(names);
-				i++;
-			}
-			
-			screen.writeTo(freq, screen.getWidth()/2, 25, GraphicsLCD.HCENTER, Font.getSmallFont());
-			
-			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
 			
 			try{
 				sleep(Delay);
