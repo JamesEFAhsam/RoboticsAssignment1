@@ -21,7 +21,7 @@ import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 
-public class ColorSensor {
+public class Robot {
 	
 	
 	
@@ -32,21 +32,21 @@ public class ColorSensor {
 	private static RGBFloat YELLOW = new RGBFloat(new RGBFloat(0.25f, 0.15f, 0.00f), new RGBFloat(0.30f, 0.20f, 0.1f));
 	private static RGBFloat RED = new RGBFloat(new RGBFloat(0.20f, 0.00f, 0.00f), new RGBFloat(0.25f, 0.05f, 0.075f));*/
 	
-	private LCDRenderer screen;
+	public LCDRenderer screen;
 	private ColorSensorMonitor colorSensor;
 	private EV3LED led;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	
 	public static void main(String[] args){
-		ColorSensor cs = new ColorSensor();
+		Robot cs = new Robot();
 		
 		cs.mainLoop();
 		
 		cs.closeRobot();
 	}
 	
-	public ColorSensor() {
+	public Robot() {
 		Brick myEV3 = BrickFinder.getDefault();
 		
 		led = (EV3LED) myEV3.getLED();

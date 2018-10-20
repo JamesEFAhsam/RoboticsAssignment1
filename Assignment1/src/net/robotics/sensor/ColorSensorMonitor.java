@@ -9,7 +9,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.sensor.EV3ColorSensor;
-import net.robotics.main.ColorSensor;
+import net.robotics.main.Robot;
 import net.robotics.screen.LCDRenderer;
 
 public class ColorSensorMonitor extends Thread{
@@ -18,9 +18,8 @@ public class ColorSensorMonitor extends Thread{
 	private EV3ColorSensor colorSensor;
 	private float[] colorSample;
 	
-	private ColorSensor robot;
+	private Robot robot;
 	private int Delay;
-	private LCDRenderer screen;
 	
 	private LinkedList<ColorNames> pastStrings;
 	private ColorNames currentColor;
@@ -45,7 +44,7 @@ public class ColorSensorMonitor extends Thread{
 			{0.05f, 0.05f, 0.1f}
 	};
 	
-	public ColorSensorMonitor(ColorSensor robot, EV3ColorSensor sensor, int Delay){
+	public ColorSensorMonitor(Robot robot, EV3ColorSensor sensor, int Delay){
 		this.setDaemon(true);
 		this.frequency = new HashMap<>();
 		this.colorSensor = sensor;
@@ -53,7 +52,6 @@ public class ColorSensorMonitor extends Thread{
 		this.pastStrings = new LinkedList<>();
 		this.robot = robot;
 		this.Delay = Delay;
-		this.screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 	}
 	
 	public synchronized void start() {
@@ -61,9 +59,10 @@ public class ColorSensorMonitor extends Thread{
 			frequency.put(color, 0);
 		}
 		
-		screen.writeTo(new String[]{
+		robot.screen.writeTo(new String[]{
 				"Starting Thread...",
-		}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
+		}, robot.screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
+		super.start();
 	}
 
 
@@ -81,17 +80,17 @@ public class ColorSensorMonitor extends Thread{
 			float[] range = ColorRanges[i];
 			i++;
 			
-			screen.writeTo(new String[]{
+			robot.screen.writeTo(new String[]{
 					"Waiting for " + colorname,
 					"Press any button",
 					
-			}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
+			}, robot.screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
 			
-			screen.drawEnterButton("Next", screen.getWidth()-30-2, screen.getHeight()-30-2, 30, 30);
+			robot.screen.drawEnterButton("Next", robot.screen.getWidth()-30-2, robot.screen.getHeight()-30-2, 30, 30);
 			
-			screen.drawDownButton("Skip", screen.getWidth()-80-2, screen.getHeight()-30-2, 45, 30);
+			robot.screen.drawDownButton("Skip", robot.screen.getWidth()-80-2, robot.screen.getHeight()-30-2, 45, 30);
 			
-			screen.drawEscapeButton("Quit", 0, screen.getHeight()-45/2-2, 45, 45/2, 6);
+			robot.screen.drawEscapeButton("Quit", 0, robot.screen.getHeight()-45/2-2, 45, 45/2, 6);
 			
 			Button.waitForAnyPress();
 			
@@ -103,7 +102,7 @@ public class ColorSensorMonitor extends Thread{
 			if(Button.DOWN.isDown())
 				continue;
 			
-			screen.clearScreen();
+			robot.screen.clearScreen();
 			
 			float[] rgb = getRGB();
 			float[] high, low, avgrange;
@@ -135,7 +134,7 @@ public class ColorSensorMonitor extends Thread{
 			
 			
 			
-			screen.writeTo(new String[]{
+			robot.screen.writeTo(new String[]{
 					"Reading: " + colorname,
 					"R("+rgb[0]+")",
 					"G("+rgb[1]+")",
@@ -143,13 +142,13 @@ public class ColorSensorMonitor extends Thread{
 					"RA("+avgrange[0]+")",
 					"GA("+avgrange[1]+")",
 					"BA("+avgrange[2]+")",
-			}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
+			}, robot.screen.getWidth()/2, 0, GraphicsLCD.HCENTER, true);
 			
 			ColorKeys.put(colorname, new RGBFloat(low, high));
 			
-			screen.drawEnterButton("Next", screen.getWidth()-30-2, screen.getHeight()-30-2, 30, 30);
+			robot.screen.drawEnterButton("Next", robot.screen.getWidth()-30-2, robot.screen.getHeight()-30-2, 30, 30);
 			
-			screen.drawEscapeButton("Quit", 0, screen.getHeight()-45/2-2, 45, 45/2, 6);
+			robot.screen.drawEscapeButton("Quit", 0, robot.screen.getHeight()-45/2-2, 45, 45/2, 6);
 			
 			do{
 				Button.waitForAnyPress();
@@ -160,9 +159,7 @@ public class ColorSensorMonitor extends Thread{
 			} while(!Button.ENTER.isDown());
 		}
 		
-		screen.clearScreen();
-		
-		super.start();
+		robot.screen.clearScreen();
 	}
 	
 	public void run() {
