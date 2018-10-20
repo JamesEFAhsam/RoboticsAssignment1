@@ -27,6 +27,19 @@ public class Map {
 		return null;
 	}
 	
+	public Tile getTile(int heading){
+		if(heading == 0){
+			return getTile(getRobotX(), getRobotY()+1);
+		} else if(heading == 1){
+			return getTile(getRobotX()+1, getRobotY());
+		} else if(heading == 2){
+			return getTile(getRobotX(), getRobotY()-1);
+		} else if(heading == 3){
+			return getTile(getRobotX()-1, getRobotY());
+		}
+		return null;
+	}
+	
 	private void setTiles(int width, int height) {
 		this.tiles = new Tile[width][height];
 		for (int x = 0; x < width; x++) {
@@ -89,6 +102,19 @@ public class Map {
 		updateRobotTile();
 	}
 	
+	public void moveRobotPos(int heading) {
+		if(heading == 0){
+			this.robotY += 1;
+		} else if(heading == 1){
+			this.robotX += 1;
+		} else if(heading == 2){
+			this.robotY -= 1;
+		} else if(heading == 3){
+			this.robotX -= 1;
+		}
+		updateRobotTile();
+	}
+	
 	public boolean canMove(int x, int y){
 		if(x < 0 || x >= width)
 			return false;
@@ -100,5 +126,39 @@ public class Map {
 			return false;
 		
 		return true;
+	}
+	
+	public boolean canMove(int heading){
+		Tile to = getTile(heading);
+		if(to == null)
+			return false;
+		
+		int x = to.getX();
+		int y = to.getY();
+		if(x < 0 || x >= width)
+			return false;
+		
+		if(y < 0 || y >= height)
+			return false;
+		
+		if(tiles[x][y].getOccupiedBelief() >= 0.95f)
+			return false;
+		
+		return true;
+	}
+	
+	public boolean beenVisited(int heading){
+		if(!canMove(heading))
+			return false;
+		
+		Tile tile = getTile(heading);
+		
+		if(tile == null)
+			return false;
+		
+		if(tile.getVisitAmount() > 0)
+			return true;
+		
+		return false;
 	}
 }

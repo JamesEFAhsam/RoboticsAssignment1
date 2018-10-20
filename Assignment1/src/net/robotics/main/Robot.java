@@ -110,59 +110,72 @@ public class Robot {
 		ColorNames prevColor = colorSensor.getColor();
 		
 		int heading = 0; // 0 Forward, Right, Back, Left
+		int amount = 0;
+		boolean visitOverride = false; 
 
 		pilot.setLinearSpeed(10);
 
 		screen.clearScreen();
-		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
-		while(!Button.ESCAPE.isDown()){
+		while(!Button.ESCAPE.isDown() && squares < 20){
 			screen.clearScreen();
 			
-			if(map.canMove(map.getRobotX(), map.getRobotY()+1)){
+			
+			
+			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
+			screen.writeTo(new String[]{
+					"V: " + visitOverride,
+					"A: " + amount,
+			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+			
+			if((!map.beenVisited(heading) || visitOverride) && map.canMove(heading)){
 				
 				observe(heading);
 				ultrasonicSensor.resetMotor();	
 				
-				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 				/*screen.writeTo(new String[]{
-						"F: " + F,
-						"L: " + L,
-						"R: " + R
+						"V: " + visitOverride
 				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 				
 				
 
 				MoveSquares(1);
 				
-				if(heading == 0){
-					map.moveRobotPos(0, 1);
-				} else if(heading == 1){
-					map.moveRobotPos(1, 0);
-				} else if(heading == 2){
-					map.moveRobotPos(0, -1);
-				} else if(heading == 3){
-					map.moveRobotPos(-1, 0);
-				}
+				map.moveRobotPos(heading);
 				
 				observe(heading);
 				ultrasonicSensor.resetMotor();	
 				
 				screen.clearScreen();
 				
-				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 				/*screen.writeTo(new String[]{
 						"F: " + F,
 						"L: " + L,
 						"R: " + R
 				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 				
-				
+				visitOverride = false;
+				amount = 0;
 				squares++;
+			} else {
+				
 				pilot.rotate(90);
+
+				observe(heading);
+				ultrasonicSensor.resetMotor();	
+
 				heading++;
 				if(heading > 3)
 					heading = 0;
+
+				amount++;
+				if(amount >= 4){
+					amount = 0;
+					visitOverride = true;
+				}
 			}
 			
 			
@@ -190,7 +203,7 @@ public class Robot {
 			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
 			*/
 
-			Button.waitForAnyPress();
+			//Button.waitForAnyPress();
 		}
 	}
 	
@@ -200,19 +213,19 @@ public class Robot {
 		boolean R = ultrasonicSensor.rotate(-180).isObjectDirectInFront();
 		
 		if(heading == 0){
-			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX(), map.getRobotY()+1, F);
 			map.updateTile(map.getRobotX()-1, map.getRobotY(), L);
 			map.updateTile(map.getRobotX()+1, map.getRobotY(), R);
 		} else if(heading == 1){
-			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX()+1, map.getRobotY(), F);
 			map.updateTile(map.getRobotX(), map.getRobotY()+1, L);
 			map.updateTile(map.getRobotX(), map.getRobotY()-1, R);
 		} else if(heading == 2){
-			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX(), map.getRobotY()-1, F);
 			map.updateTile(map.getRobotX()+1, map.getRobotY(), L);
 			map.updateTile(map.getRobotX()-1, map.getRobotY(), R);
 		} else if(heading == 3){
-			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX()-1, map.getRobotY(), F);
 			map.updateTile(map.getRobotX(), map.getRobotY()-1, L);
 			map.updateTile(map.getRobotX(), map.getRobotY()+1, R);
 		}
