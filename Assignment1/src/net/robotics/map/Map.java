@@ -36,6 +36,14 @@ public class Map {
 		}
 	}
 	
+	public void updateTile(int x, int y, boolean isEmpty){
+		Tile tile = getTile(x, y);
+		if(tile == null)
+			return;
+		
+		tile.view(isEmpty);
+	}
+	
 
 	private void setTiles(Tile[][] tiles) {
 		this.tiles = tiles;

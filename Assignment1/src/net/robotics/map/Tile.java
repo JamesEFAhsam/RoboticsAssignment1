@@ -14,6 +14,9 @@ public class Tile {
 		this.viewed = 0;
 		this.empty = 0;
 		this.visited = 0;
+		
+		this.view(false);
+		this.view(true);
 	}
 	
 	public void view(boolean isEmpty){
@@ -23,8 +26,11 @@ public class Tile {
 	}
 	
 	public float getOccupiedBelief(){
-		if(visited == 0 && this.viewed != 0f)
+		if(visited == 0 && this.viewed != 0f){
+			if(this.empty == 0)
+				return 0;
 			this.occupiedBelief = this.viewed/this.empty;
+		}
 		return this.occupiedBelief;
 	}
 	

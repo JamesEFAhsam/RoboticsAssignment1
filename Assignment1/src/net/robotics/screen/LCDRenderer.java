@@ -216,7 +216,7 @@ public class LCDRenderer{
 				else
 					lcd.setStrokeStyle(lcd.SOLID);
 				
-				if(ob >= 0.95f)
+				if(ob >= 0.75f)
 					lcd.fillRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
 				else
 					lcd.drawRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);

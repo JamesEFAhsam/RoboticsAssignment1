@@ -1,6 +1,8 @@
 
-*.jar
-
 *.class
 
-*.class
+Assignment1/ColorSensor.jar
+
+Assignment1/MoveByColor.jar
+
+Assignment1/Robot.jar
