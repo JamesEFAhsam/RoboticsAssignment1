@@ -65,18 +65,20 @@ public class Robot {
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 10);
 		
 		NXTRegulatedMotor motor = null;
-		boolean uninit = false;
-		while(!uninit){
+		EV3UltrasonicSensor ultra = null;
+		
+		while(true){
 			try {
+				ultra = new EV3UltrasonicSensor(myEV3.getPort("S3"));
 				motor = Motor.C;
-			} finally {
-				uninit = true;
+				break;
+			} catch(Exception e) {
 			}
 		}
 		
 		
 		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
-				new EV3UltrasonicSensor(myEV3.getPort("S3")), 
+				ultra, 
 				motor, 100);
 		
 		setUpRobot();
@@ -106,37 +108,61 @@ public class Robot {
 	public void mainLoop(){
 		int squares = 0;
 		ColorNames prevColor = colorSensor.getColor();
+		
+		int heading = 0; // 0 Forward, Right, Back, Left
 
 		pilot.setLinearSpeed(10);
 
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
 
-		while(!Button.ESCAPE.isDown() && squares < 6){
+		while(!Button.ESCAPE.isDown()){
 			screen.clearScreen();
+			
 			if(map.canMove(map.getRobotX(), map.getRobotY()+1)){
 				
-				boolean F = ultrasonicSensor.isObjectDirectInFront();
-				boolean L = ultrasonicSensor.rotate(90).isObjectDirectInFront();
-				boolean R = ultrasonicSensor.rotate(-180).isObjectDirectInFront();
-				
-				map.updateTile(map.getRobotX(), map.getRobotY(), F);
-				map.updateTile(map.getRobotX()-1, map.getRobotY(), L);
-				map.updateTile(map.getRobotX()+1, map.getRobotY(), R);
+				observe(heading);
+				ultrasonicSensor.resetMotor();	
 				
 				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
-				screen.writeTo(new String[]{
+				/*screen.writeTo(new String[]{
 						"F: " + F,
 						"L: " + L,
 						"R: " + R
-				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 				
-				ultrasonicSensor.resetMotor();				
 				
+
 				MoveSquares(1);
-				map.moveRobotPos(0, 1);
+				
+				if(heading == 0){
+					map.moveRobotPos(0, 1);
+				} else if(heading == 1){
+					map.moveRobotPos(1, 0);
+				} else if(heading == 2){
+					map.moveRobotPos(0, -1);
+				} else if(heading == 3){
+					map.moveRobotPos(-1, 0);
+				}
+				
+				observe(heading);
+				ultrasonicSensor.resetMotor();	
+				
+				screen.clearScreen();
+				
+				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+				/*screen.writeTo(new String[]{
+						"F: " + F,
+						"L: " + L,
+						"R: " + R
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+				
+				
 				squares++;
-				//pilot.rotate(90);
+				pilot.rotate(90);
+				heading++;
+				if(heading > 3)
+					heading = 0;
 			}
 			
 			
@@ -167,15 +193,44 @@ public class Robot {
 			Button.waitForAnyPress();
 		}
 	}
+	
+	private void observe(int heading){
+		boolean F = ultrasonicSensor.isObjectDirectInFront();
+		boolean L = ultrasonicSensor.rotate(90).isObjectDirectInFront();
+		boolean R = ultrasonicSensor.rotate(-180).isObjectDirectInFront();
+		
+		if(heading == 0){
+			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX()-1, map.getRobotY(), L);
+			map.updateTile(map.getRobotX()+1, map.getRobotY(), R);
+		} else if(heading == 1){
+			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX(), map.getRobotY()+1, L);
+			map.updateTile(map.getRobotX(), map.getRobotY()-1, R);
+		} else if(heading == 2){
+			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX()+1, map.getRobotY(), L);
+			map.updateTile(map.getRobotX()-1, map.getRobotY(), R);
+		} else if(heading == 3){
+			map.updateTile(map.getRobotX(), map.getRobotY(), F);
+			map.updateTile(map.getRobotX(), map.getRobotY()-1, L);
+			map.updateTile(map.getRobotX(), map.getRobotY()+1, R);
+		}
+	}
 
 	private void MoveSquares(int i){
+		int direction = (i/Math.abs(i));
+		
 		for (int j = 0; j < i; j++) {
-			pilot.forward();
+			if(direction == 1)
+				pilot.forward();
+			else
+				pilot.backward();
 			ColorNames cn;
 			do{
 				cn = colorSensor.getCurrentColor();
 			}while(cn != ColorNames.BLACK);
-			pilot.travel(10f);
+			pilot.travel(direction*10f);
 		}
 	}
 

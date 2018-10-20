@@ -15,8 +15,8 @@ public class Tile {
 		this.empty = 0;
 		this.visited = 0;
 		
-		this.view(false);
-		this.view(true);
+		//this.view(false);
+		//this.view(true);
 	}
 	
 	public void view(boolean isEmpty){
