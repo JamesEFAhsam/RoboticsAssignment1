@@ -1,4 +1,4 @@
-package net.robotics.main;
+package net.robotics.screen;
 
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;

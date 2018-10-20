@@ -7,6 +7,7 @@ import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -16,6 +17,9 @@ import lejos.robotics.chassis.Wheel;
 import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
+import net.robotics.screen.LCDRenderer;
+import net.robotics.sensor.ColorSensorMonitor;
+import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 
 public class ColorSensor {
 	
@@ -77,14 +81,33 @@ public class ColorSensor {
 	}
 	
 	public void mainLoop(){
-		while(!Button.ESCAPE.isDown()){
+		int squares = 0;
+		ColorNames prevColor = colorSensor.getColor();
+		pilot.setLinearSpeed(1);
+		pilot.forward();
+		while(!Button.ESCAPE.isDown() && squares < 4){
 			
 			//screen.clearScreen();
 			//screen.writeTo(new String[]{"F? "+(colorSensor.getColorFrequency() != null)});
 			
-			pilot.forward();
 			
-			Button.waitForAnyPress();
+			
+			if(colorSensor.getCurrentColor() == ColorNames.BLACK && prevColor != ColorNames.BLACK){
+				squares++;
+			}
+			
+			if(colorSensor.getCurrentColor() != prevColor){
+				prevColor = colorSensor.getCurrentColor();
+			}
+			
+			screen.clearScreen();
+			screen.writeTo(new String[]{"Passed through "+squares+" squares.",
+					"Color. " + colorSensor.getCurrentColor(),
+					"Previous. " + prevColor
+					}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, Font.getSmallFont());
+			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
+			
+			//Button.waitForAnyPress();
 		}
 	}
 	

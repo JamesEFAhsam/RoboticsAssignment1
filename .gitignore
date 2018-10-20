@@ -1,4 +1,6 @@
 
-*.jar
-
 *.class
+
+Assignment1/ColorSensor.jar
+
+Assignment1/MoveByColor.jar
