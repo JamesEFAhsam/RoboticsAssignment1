@@ -2,6 +2,8 @@ package net.robotics.screen;
 
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
+import net.robotics.map.Map;
+import net.robotics.map.Tile;
 
 //Screen Width 178, Height 128; 
 
@@ -197,6 +199,42 @@ public class LCDRenderer{
 	
 	public void writeTo(String[] content){
 		writeTo(content, getWidth()/2, 0, GraphicsLCD.HCENTER);
+	}
+	
+	public void drawMap(int x, int y, Map map){
+		writeTo(new String[]{
+				"X: " + map.getRobotX(),
+				"Y: " + map.getRobotY(),
+		}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+		
+		for (int g = 0; g < map.getWidth(); g++) {
+			for (int u = 0; u < map.getHeight(); u++) {
+				Tile tile = map.getTile(g,u);
+				float ob = tile.getOccupiedBelief();
+				if(ob <= 0.5f)
+					lcd.setStrokeStyle(lcd.DOTTED);
+				else
+					lcd.setStrokeStyle(lcd.SOLID);
+				
+				if(ob >= 0.75f)
+					lcd.fillRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
+				else
+					lcd.drawRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
+				
+				if(g == map.getRobotX() && u == map.getRobotY()){
+					Font f = lcd.getFont();
+					lcd.setFont(Font.getDefaultFont());
+					lcd.drawChar('R', x+(tile.getX()*16) , y+(tile.getY()*16) , GraphicsLCD.VCENTER);
+					lcd.setFont(f);
+				} else {
+					Font f = lcd.getFont();
+					lcd.setFont(Font.getSmallFont());
+					lcd.drawString("" + Math.round(ob*100), x+(tile.getX()*16) + 2, y+(tile.getY()*16)+ 4, GraphicsLCD.VCENTER);
+					lcd.setFont(f);
+				}
+			}
+		}
+		
 	}
 	
 	public int getWidth(){
