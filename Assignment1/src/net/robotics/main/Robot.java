@@ -117,48 +117,7 @@ public class Robot {
 		opp = new OdometryPoseProvider(pilot);
 	}
 	
-	public void localiseOrientation() {
-		Pose initialPose = opp.getPose();
-		if (findEdges()) {
-			alignWithEdge();
-		}
-	}
 	
-	// Returns edges next to the robot that can be localised against, aroun
-	public boolean[] findEdges() {
-		boolean[] foundEdges = new boolean[4];
-		int rX = map.getRobotX();
-		int rY = map.getRobotY();
-		
-		int[][] neighbourOffsets = {
-				{0,1}, // Above
-				{0,-1},// Below
-				{-1,0},// To left
-				{1,0}, // To right
-		};
-		// Check each neighbour
-		for(int i = 0; i<4; i++) {
-			//Check if 6 is in x axis.
-			if (rX + neighbourOffsets[i][0] > 6 || rX + neighbourOffsets[i][0] < 0) {
-				foundEdges[i] = true;
-			}else if (rY + neighbourOffsets[i][1] > 7 || rY + neighbourOffsets[i][1] < 0) {
-				foundEdges[i] = true;
-			}else {
-				
-			}
-		}
-		return foundEdges;
-	}
-	
-	public void alignWithEdge() {
-		pilot.forward();
-		while(leftSample[0] < 0.9 && rightSample[0] < 0.9) {
-			leftTouch.fetchSample(leftSample, 0);
-	    	rightTouch.fetchSample(rightSample, 0);
-		}
-		pilot.stop();
-		pilot.travel(-5);
-	}
 	
 
 	public void closeProgram(){
@@ -175,8 +134,7 @@ public class Robot {
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
 
-		 while(!Button.ESCAPE.isDown() /* && squares < 6 */){
-			 /*
+		 while(!Button.ESCAPE.isDown() && squares < 6 ){
 			screen.clearScreen();
 			if(map.canMove(map.getRobotX(), map.getRobotY()+1)){
 				
@@ -201,10 +159,6 @@ public class Robot {
 				map.moveRobotPos(0, 1);
 				squares++;
 				//pilot.rotate(90);
-				 */
-			 
-			 alignWithEdge();
-			
 			
 
 			
@@ -250,5 +204,33 @@ public class Robot {
 	}
 
 	public void closeRobot(){
+	}
+	
+	public OdometryPoseProvider getOpp() {
+		return opp;
+	}
+	
+	public Map getMap() {
+		return map;
+	}
+
+	public MovePilot getPilot() {
+		return pilot;
+	}
+	
+	public float[] getLeftSample() {
+		return leftSample;
+	}
+	
+	public float[] getRightSample() {
+		return rightSample;
+	}
+	
+	public SampleProvider getLeftTouch() {
+		return leftTouch;
+	}
+	
+	public SampleProvider getRightTouch() {
+		return rightTouch;
 	}
 }
