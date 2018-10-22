@@ -14,15 +14,20 @@ import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
+import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.internal.ev3.EV3LED;
 import lejos.robotics.chassis.Chassis;
 import lejos.robotics.chassis.Wheel;
 import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
+import lejos.robotics.navigation.Pose;
+import lejos.robotics.SampleProvider;
 import net.robotics.map.Map;
+import net.robotics.map.Tile;
 import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
@@ -46,6 +51,20 @@ public class Robot {
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
+	
+	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
+	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
+	
+	private static EV3TouchSensor leftBumper = new EV3TouchSensor(leftBumpPort);
+	private static EV3TouchSensor rightBumper = new EV3TouchSensor(rightBumpPort);
+	
+	private static SampleProvider leftTouch = leftBumper.getMode("Touch");
+	private static SampleProvider rightTouch = rightBumper.getMode("Touch");
+	
+	private static float[] leftSample = new float[leftTouch.sampleSize()];
+	private static float[] rightSample = new float[rightTouch.sampleSize()];
+	
+	
 
 	public static void main(String[] args){
 		Robot cs = new Robot();
@@ -97,6 +116,50 @@ public class Robot {
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
 	}
+	
+	public void localiseOrientation() {
+		Pose initialPose = opp.getPose();
+		if (findEdges()) {
+			alignWithEdge();
+		}
+	}
+	
+	// Returns edges next to the robot that can be localised against, aroun
+	public boolean[] findEdges() {
+		boolean[] foundEdges = new boolean[4];
+		int rX = map.getRobotX();
+		int rY = map.getRobotY();
+		
+		int[][] neighbourOffsets = {
+				{0,1}, // Above
+				{0,-1},// Below
+				{-1,0},// To left
+				{1,0}, // To right
+		};
+		// Check each neighbour
+		for(int i = 0; i<4; i++) {
+			//Check if 6 is in x axis.
+			if (rX + neighbourOffsets[i][0] > 6 || rX + neighbourOffsets[i][0] < 0) {
+				foundEdges[i] = true;
+			}else if (rY + neighbourOffsets[i][1] > 7 || rY + neighbourOffsets[i][1] < 0) {
+				foundEdges[i] = true;
+			}else {
+				
+			}
+		}
+		return foundEdges;
+	}
+	
+	public void alignWithEdge() {
+		pilot.forward();
+		while(leftSample[0] < 0.9 && rightSample[0] < 0.9) {
+			leftTouch.fetchSample(leftSample, 0);
+	    	rightTouch.fetchSample(rightSample, 0);
+		}
+		pilot.stop();
+		pilot.travel(-5);
+	}
+	
 
 	public void closeProgram(){
 		closeRobot();
@@ -112,7 +175,8 @@ public class Robot {
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
 
-		while(!Button.ESCAPE.isDown() && squares < 6){
+		 while(!Button.ESCAPE.isDown() /* && squares < 6 */){
+			 /*
 			screen.clearScreen();
 			if(map.canMove(map.getRobotX(), map.getRobotY()+1)){
 				
@@ -137,7 +201,9 @@ public class Robot {
 				map.moveRobotPos(0, 1);
 				squares++;
 				//pilot.rotate(90);
-			}
+				 */
+			 
+			 alignWithEdge();
 			
 			
 
