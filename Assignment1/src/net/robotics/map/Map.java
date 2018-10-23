@@ -10,7 +10,7 @@ public class Map {
 		this.setWidth(width);
 		this.setHeight(height);
 		this.setTiles(width, height);
-		this.setRobotPos(0, 0);
+		this.setRobotPos(0, 0, 0);		//(x, y, heading)
 		updateRobotTile();
 	}
 	
@@ -75,17 +75,14 @@ public class Map {
 		return robotY;
 	}
 	
-	public void setRobotHeading(int robotHeading) {
-		this.robotHeading = robotHeading;
-	}
-	
 	public int getRobotHeading() {
 		return robotHeading;
 	}
 
-	public void setRobotPos(int robotX, int robotY) {
+	public void setRobotPos(int robotX, int robotY, int robotHeading) {
 		this.robotX = robotX;
 		this.robotY = robotY;
+		this.robotHeading = robotHeading;
 		updateRobotTile();
 	}
 	

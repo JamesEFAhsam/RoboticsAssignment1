@@ -1,13 +1,13 @@
 package behaviours;
 import lejos.robotics.subsumption.Behavior;
-import Subsumption.RobotBrain;
+import net.robotics.main.Robot;
 
-public class AvoidObstacles implements Behavior {
+public class IceSlide implements Behavior{
 	public boolean suppressed;
-	private RobotBrain robot;
+	private Robot robot;
 	
-	public AvoidObstacles (RobotBrain rob) {
-		robot = rob;
+	public IceSlide (Robot robot) {
+		this.robot = robot;
 	}
 	
 	public void suppress() {
