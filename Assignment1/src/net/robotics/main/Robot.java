@@ -3,8 +3,6 @@ package net.robotics.main;
 import java.util.Dictionary;
 import java.util.HashMap;
 
-import org.omg.PortableInterceptor.PolicyFactoryOperations;
-
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -64,14 +62,16 @@ public class Robot {
 	private static float[] leftSample = new float[leftTouch.sampleSize()];
 	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
+	public static Robot current;
+	
 	
 
 	public static void main(String[] args){
-		Robot cs = new Robot();
+		current = new Robot();
 
-		cs.mainLoop();
+		current.mainLoop();
 
-		cs.closeRobot();
+		current.closeRobot();
 	}
 
 	public Robot() {
