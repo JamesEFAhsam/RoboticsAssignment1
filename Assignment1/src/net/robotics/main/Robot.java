@@ -198,6 +198,28 @@ public class Robot {
 			pilot.travel(10f);
 		}
 	}
+	
+	public void turnToHeading(int desiredHeading) {
+		int initialHeading = map.getRobotHeading();
+		int headingDifference = desiredHeading - initialHeading;
+		int rotationAmount = 0;
+		switch(headingDifference) {
+			case 1: 
+			case -3:
+				rotationAmount = 90;
+				break;
+			case 2: 
+			case -2:
+				rotationAmount = 180;
+				break;
+			case -1:
+			case 3:
+				rotationAmount = -90;
+				break;
+		}
+		pilot.rotate(rotationAmount);
+		map.setRobotPos(map.getRobotX(), map.getRobotY(), desiredHeading);
+	}
 
 	public LCDRenderer getScreen(){
 		return screen;
