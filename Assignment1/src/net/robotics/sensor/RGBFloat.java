@@ -1,6 +1,6 @@
-package net.robotics.main;
+package net.robotics.sensor;
 
-class RGBFloat{
+public class RGBFloat{
 	private float R, G, B;
 	private RGBFloat HIGH, LOW;
 	public boolean comparative;
