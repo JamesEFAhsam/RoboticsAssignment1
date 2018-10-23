@@ -70,15 +70,15 @@ public class Tile {
 	}
 	
 	//NEW METHODS
-	protected Collection <Tile> getTiles() {
+	public Collection <Tile> getTiles() {
 		return tilesArray;
 	}
 	
-	protected int numberofTiles() {
+	public int numberofTiles() {
 		return tilesArray.size();
 	}
 	
-	protected boolean addNewTile(Tile nextTile) {
+	public boolean addNewTile(Tile nextTile) {
 		if(tilesArray.contains(nextTile)) {
 			return false;
 		}
@@ -89,7 +89,7 @@ public class Tile {
 		return true;
 	}
 	
-	protected boolean removeTile(Tile nextTile) {
+	public boolean removeTile(Tile nextTile) {
 		return tilesArray.remove(nextTile);
 	}
 	
@@ -97,7 +97,7 @@ public class Tile {
 		h_score = h;
 	}
 	
-	protected double calculateG(Tile nextTile) {
+	public double calculateG(Tile nextTile) {
 		double xDistance = this.x - nextTile.x;
 		double yDistance = this.y - nextTile.y;
 		double distance = Math.sqrt( (xDistance*xDistance) + (yDistance*yDistance));		
