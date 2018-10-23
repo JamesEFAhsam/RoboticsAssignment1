@@ -159,7 +159,7 @@ public class Robot {
 				map.moveRobotPos(0, 1);
 				squares++;
 				//pilot.rotate(90);
-			
+			}
 
 			
 

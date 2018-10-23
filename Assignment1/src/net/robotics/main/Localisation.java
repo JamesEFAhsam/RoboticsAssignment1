@@ -3,23 +3,33 @@ package net.robotics.main;
 
 import net.robotics.map.Map;
 import lejos.robotics.navigation.Pose;
+import lejos.robotics.SampleProvider;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
 
 public class Localisation {
 	
-	public void localiseOrientation() {
-		Pose initialPose = .getPose();
-		if (findEdges() {
-			alignWithEdge();
-		}
+	public void localiseRobot(Robot robot) {
+		localisePosition(robot);
+		localiseOrientation(robot);
+	}
+	
+	public void localisePosition(Robot robot) {
+		
+	}
+	
+	public void localiseOrientation(Robot robot) {
+		Pose initialPose = robot.getOpp().getPose();
+		// Look for suitable edge, then align with it
+			boolean[] foundEdges = findEdges(robot);
+			alignWithEdge(robot);
 	}
 	
 	// Returns edges next to the robot that can be localised against
-	public boolean[] findEdges() {
+	public boolean[] findEdges(Robot robot) {
 		boolean[] foundEdges = new boolean[4];
-		int rX = map.getRobotX();
-		int rY = map.getRobotY();
+		int rX = robot.getMap().getRobotX();
+		int rY = robot.getMap().getRobotY();
 		
 		int[][] neighbourOffsets = {
 				{0,1}, // Above
@@ -40,7 +50,13 @@ public class Localisation {
 		return foundEdges;
 	}
 	
-	public void alignWithEdge() {
+	public void alignWithEdge(Robot robot) {
+		MovePilot pilot = robot.getPilot();
+		float[] leftSample = robot.getLeftSample();
+		float[] rightSample = robot.getRightSample();
+		SampleProvider leftTouch = robot.getLeftTouch();
+		SampleProvider rightTouch = robot.getRightTouch();
+		
 		pilot.forward();
 		while(leftSample[0] < 0.9 && rightSample[0] < 0.9) {
 			leftTouch.fetchSample(leftSample, 0);
