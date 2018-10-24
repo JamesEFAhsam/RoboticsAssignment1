@@ -49,6 +49,7 @@ public class Robot {
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
+	private Localisation localisation;
 	
 	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
 	
@@ -66,7 +67,7 @@ public class Robot {
 	
 	public static Robot current;
 	
-	
+
 
 	public static void main(String[] args){
 		current = new Robot();
@@ -85,6 +86,8 @@ public class Robot {
 
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
 		
+		localisation = new Localisation();
+		
 		NXTRegulatedMotor motor = null;
 		EV3UltrasonicSensor ultra = null;
 		
@@ -96,7 +99,6 @@ public class Robot {
 			} catch(Exception e) {
 			}
 		}
-		
 		
 		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
 				ultra, 
@@ -112,8 +114,6 @@ public class Robot {
 		colorSensor.start();
 		
 		ultrasonicSensor.start();
-
-
 	}
 
 	private void setUpRobot(){
@@ -122,9 +122,6 @@ public class Robot {
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
 	}
-	
-	
-	
 
 	public void closeProgram(){
 		closeRobot();
@@ -149,8 +146,6 @@ public class Robot {
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);*/
 		
 		//Button.waitForAnyPress();
-		
-		Localisation localisation = new Localisation();
 		
 		map.setRobotPos(3, 4, 3);
 		map.getTile(3, 5).view(false);
@@ -383,5 +378,9 @@ public class Robot {
 	
 	public SampleProvider getRightTouch() {
 		return rightTouch;
+	}
+	
+	public ColorSensorMonitor getColorSensor() {
+		return colorSensor;
 	}
 }
