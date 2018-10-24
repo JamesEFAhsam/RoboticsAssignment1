@@ -108,6 +108,8 @@ public class Robot {
 
 		colorSensor.configure(true);
 		colorSensor.start();
+		
+		ultrasonicSensor.start();
 
 
 	}
@@ -228,6 +230,18 @@ public class Robot {
 	
 	private void observe(int heading){
 		ultrasonicSensor.clear();
+		
+		//ultrasonicSensor.getAssuredDistance();
+		/*
+		Robot.current.screen.writeTo(new String[]{
+				"P: " + ultrasonicSensor.pointer + "/" + ultrasonicSensor.distance[ultrasonicSensor.pointer]
+		}, 0, 100, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+		
+		screen.writeTo(new String[]{
+				"F: " + ultrasonicSensor.getAssuredDistance()
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+		
+		ultrasonicSensor.clear();
 		try {
 			Thread.sleep(60*5);
 		} catch (InterruptedException e) {
@@ -249,11 +263,11 @@ public class Robot {
 		}
 		float R = ultrasonicSensor.rotate(-180).getDistance();
 		
-		screen.writeTo(new String[]{
+		/*screen.writeTo(new String[]{
 				"F: " + F,
 				"L: " + L,
 				"R: " + R,
-		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());/*/
 		
 		map.updateMap(heading, F, L, R);
 	}
