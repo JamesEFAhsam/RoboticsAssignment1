@@ -2,6 +2,7 @@ package net.robotics.screen;
 
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
+import net.robotics.main.Robot;
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
 
@@ -216,10 +217,12 @@ public class LCDRenderer{
 				else
 					lcd.setStrokeStyle(lcd.SOLID);
 				
-				if(ob >= 0.75f)
-					lcd.fillRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
-				else
-					lcd.drawRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
+				if(ob >= Robot.current._OCCUPIEDBELIEFCUTOFF) {
+					lcd.fillRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
+				}else {
+					lcd.drawRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
+				}
+
 				
 				if(g == map.getRobotX() && u == map.getRobotY()){
 					Font f = lcd.getFont();
@@ -229,7 +232,7 @@ public class LCDRenderer{
 				} else {
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getSmallFont());
-					lcd.drawString(tile.getEmpty() + "" + tile.getViewed(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= 0.75f);
+					lcd.drawString(, x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
 					lcd.setFont(f);
 				}
 			}

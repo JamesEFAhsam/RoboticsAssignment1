@@ -50,6 +50,8 @@ public class Robot {
 	private OdometryPoseProvider opp;
 	private Map map;
 	
+	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
+	
 	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
 	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
 	
@@ -131,6 +133,7 @@ public class Robot {
 
 	public void mainLoop(){
 		int squares = 0;
+		/*
 		ColorNames prevColor = colorSensor.getColor();
 		
 		int heading = 0; // 0 Forward, Right, Back, Left
@@ -140,10 +143,21 @@ public class Robot {
 		pilot.setLinearSpeed(10);
 
 		screen.clearScreen();
-		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+		*/
+		Localisation localisation = new Localisation();
+		screen.clearScreen();
+		screen.clearScreen();
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
 
+		//map.setRobotPos(3, 4, 3);
+		//map.getTile(3, 5).view(false);
+		localisation.localiseOrientation();
 
-		while(!Button.ESCAPE.isDown() && squares < 20){
+		
+
+		 while(!Button.ESCAPE.isDown() && squares < 6 ){
+			 /*
 			screen.clearScreen();
 			
 			
@@ -200,6 +214,7 @@ public class Robot {
 					visitOverride = true;
 				}
 			}
+			*/
 
 			
 
@@ -224,6 +239,7 @@ public class Robot {
 			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
 			*/
 
+			Button.waitForAnyPress();
 			//Button.waitForAnyPress();
 		}
 	}
@@ -284,7 +300,7 @@ public class Robot {
 			do{
 				cn = colorSensor.getCurrentColor();
 			}while(cn != ColorNames.BLACK);
-			pilot.travel(direction*12f);
+			pilot.travel(12.5f);
 		}
 	}
 	
