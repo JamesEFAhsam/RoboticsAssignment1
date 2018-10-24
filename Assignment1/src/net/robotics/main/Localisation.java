@@ -27,12 +27,15 @@ public class Localisation {
 	private int rX = Robot.current.getMap().getRobotX();
 	private int rY = Robot.current.getMap().getRobotY();
 	
+	public enum dHeadingPosition {
+		Top, Right, Down, Left
+	}
+	
 	private int[][] neighbourOffsets = {
 			{0,1}, // Above 	[0]
 			{1,0}, // To right	[1]
 			{0,-1},// Below 	[2]
-			{-1,0},// To left	[3]
-			
+			{-1,0},// To left	[3]	
 	};
 	
 	public void localisePosition() {
@@ -92,12 +95,13 @@ public class Localisation {
 		int yLocaliseCell;
 	}
 	
-	public void localiseOrientation() {
+	public boolean localiseOrientation() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();	// Save initial heading
 		boolean[] foundEdges = findEdges();						// Look for edges
 		
 		if (foundEdges[initialHeading]) {						// Check if we are already facing edge
 			alignWithEdge();
+			return true;
 		} else { 												// Check for edges we aren't facing
 			for (int i=0; i<4; i++) {
 				if(i == initialHeading) {						// Ignore direction we are facing
@@ -107,10 +111,12 @@ public class Localisation {
 					Robot.current.turnToHeading(i);				// Turn to edge
 					alignWithEdge();							// Align against edge
 					Robot.current.turnToHeading(initialHeading);// Turn back to initial position
-					break;
+					return true;
 				}
 			}
 		}
+		
+		return false;
 	}
 	
 	
@@ -125,14 +131,17 @@ public class Localisation {
 			int nX = rX + neighbourOffsets[i][0];
 			int nY = rY + neighbourOffsets[i][1];
 			
-			if (nX > 5 || nX < 0) { 		//check if West or East wall
+			int mWidth = Robot.current.getMap().getWidth();
+			int mHeight = Robot.current.getMap().getHeight();
+			
+			if (nX > mWidth-1 || nX < 0) { 		//check if West or East wall
 				foundEdges[i] = true;
-			}else if (nY > 6 || nY < 0) { 	//check if North or South wall
+			}else if (nY > mHeight-1 || nY < 0) { 	//check if North or South wall
 				foundEdges[i] = true;
 			}else {
 				Tile tile = Robot.current.getMap().getTile(nX,nY);
 				// If tile is likely occupied, return true, else return False	
-				if (tile.getOccupiedBelief() > 0.9) {
+				if (tile.getOccupiedBelief() > Robot.current._OCCUPIEDBELIEFCUTOFF) {
 					foundEdges[i] = true;
 				} else {
 					foundEdges[i] = false;

@@ -50,6 +50,8 @@ public class Robot {
 	private OdometryPoseProvider opp;
 	private Map map;
 	
+	public final float _OCCUPIEDBELIEFCUTOFF = 0.9f;
+	
 	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
 	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
 	
