@@ -232,7 +232,7 @@ public class LCDRenderer{
 				} else {
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getSmallFont());
-					lcd.drawString(tile.getEmpty() + "" + tile.getVisitAmount(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
+					lcd.drawString(tile.getEmpty() + "" + tile.getViewed(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
 					lcd.setFont(f);
 				}
 			}
