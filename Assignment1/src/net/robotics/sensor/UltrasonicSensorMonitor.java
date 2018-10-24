@@ -12,6 +12,11 @@ public class UltrasonicSensorMonitor extends Thread{
 	private NXTRegulatedMotor motor;
 	private float[] sample;
 	
+	private float distance[];
+	private int pointer;
+	
+	private int amount;
+	
 	private Robot robot;
 	private int Delay;
 	
@@ -25,6 +30,8 @@ public class UltrasonicSensorMonitor extends Thread{
 		this.sample = new float[sensor.getDistanceMode().sampleSize()];
 		this.robot = robot;
 		this.Delay = Delay;
+		
+		this.distance = new float[5];
 	}
 	
 	public synchronized void start() {
@@ -46,6 +53,14 @@ public class UltrasonicSensorMonitor extends Thread{
 		return sample[0];
 	}
 	
+	public float getAssuredDistance(){
+		float avg = 0;
+		for (int i = 0; i < distance.length; i++) {
+			avg += distance[i];
+		}
+		return .5f;
+	}
+	
 	public UltrasonicSensorMonitor rotate(int degrees){
 		motor.rotate(degrees);
 		return this;
@@ -56,10 +71,26 @@ public class UltrasonicSensorMonitor extends Thread{
 		return this;
 	}
 	
+	public UltrasonicSensorMonitor clear(){
+		for (int i = 0; i < distance.length; i++) {
+			distance[i] = 0;
+		}
+		amount = 0;
+		return this;
+	}
+	
 	public void run() {
 		
 		
 		while(true){
+			
+			distance[pointer] = getDistance();
+			
+			pointer++;
+			if(pointer>=5)
+				pointer = 0;
+			
+			amount++;
 			try{
 				sleep(Delay);
 			} catch(Exception e){

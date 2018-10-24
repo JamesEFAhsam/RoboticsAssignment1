@@ -62,7 +62,7 @@ public class Robot {
 
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 
-		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 10);
+		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
 		
 		NXTRegulatedMotor motor = null;
 		EV3UltrasonicSensor ultra = null;
@@ -79,7 +79,7 @@ public class Robot {
 		
 		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
 				ultra, 
-				motor, 100);
+				motor, 60);
 		
 		setUpRobot();
 
@@ -124,10 +124,7 @@ public class Robot {
 			
 			
 			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
-			screen.writeTo(new String[]{
-					"V: " + visitOverride,
-					"A: " + amount,
-			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+			
 			
 			if((!map.beenVisited(heading) || visitOverride) && map.canMove(heading)){
 				
@@ -160,6 +157,7 @@ public class Robot {
 				visitOverride = false;
 				amount = 0;
 				squares++;
+				
 			} else {
 				
 				pilot.rotate(90);
@@ -208,27 +206,35 @@ public class Robot {
 	}
 	
 	private void observe(int heading){
-		boolean F = ultrasonicSensor.isObjectDirectInFront();
-		boolean L = ultrasonicSensor.rotate(90).isObjectDirectInFront();
-		boolean R = ultrasonicSensor.rotate(-180).isObjectDirectInFront();
-		
-		if(heading == 0){
-			map.updateTile(map.getRobotX(), map.getRobotY()+1, F);
-			map.updateTile(map.getRobotX()-1, map.getRobotY(), L);
-			map.updateTile(map.getRobotX()+1, map.getRobotY(), R);
-		} else if(heading == 1){
-			map.updateTile(map.getRobotX()+1, map.getRobotY(), F);
-			map.updateTile(map.getRobotX(), map.getRobotY()+1, L);
-			map.updateTile(map.getRobotX(), map.getRobotY()-1, R);
-		} else if(heading == 2){
-			map.updateTile(map.getRobotX(), map.getRobotY()-1, F);
-			map.updateTile(map.getRobotX()+1, map.getRobotY(), L);
-			map.updateTile(map.getRobotX()-1, map.getRobotY(), R);
-		} else if(heading == 3){
-			map.updateTile(map.getRobotX()-1, map.getRobotY(), F);
-			map.updateTile(map.getRobotX(), map.getRobotY()-1, L);
-			map.updateTile(map.getRobotX(), map.getRobotY()+1, R);
+		ultrasonicSensor.clear();
+		try {
+			Thread.sleep(60*5);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		float F = ultrasonicSensor.getDistance();
+		ultrasonicSensor.clear();
+		try {
+			Thread.sleep(60*5);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		float L = ultrasonicSensor.rotate(90).getDistance();
+		ultrasonicSensor.clear();
+		try {
+			Thread.sleep(60*5);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		float R = ultrasonicSensor.rotate(-180).getDistance();
+		
+		screen.writeTo(new String[]{
+				"F: " + F,
+				"L: " + L,
+				"R: " + R,
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+		
+		map.updateMap(heading, F, L, R);
 	}
 
 	private void MoveSquares(int i){
@@ -243,7 +249,7 @@ public class Robot {
 			do{
 				cn = colorSensor.getCurrentColor();
 			}while(cn != ColorNames.BLACK);
-			pilot.travel(direction*10f);
+			pilot.travel(direction*12f);
 		}
 	}
 

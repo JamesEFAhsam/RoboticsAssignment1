@@ -27,9 +27,9 @@ public class Tile {
 	
 	public float getOccupiedBelief(){
 		if(visited == 0 && this.viewed != 0f){
-			if(this.empty == 0)
+			if(this.viewed == 0)
 				return 0;
-			this.occupiedBelief = this.viewed/this.empty;
+			this.occupiedBelief = this.empty/this.viewed;
 		}
 		return this.occupiedBelief;
 	}
@@ -41,6 +41,14 @@ public class Tile {
 	
 	public int getVisitAmount(){
 		return this.visited;
+	}
+	
+	public int getEmpty(){
+		return this.empty;
+	}
+	
+	public int getViewed(){
+		return this.viewed;
 	}
 
 	public int getX() {

@@ -229,7 +229,7 @@ public class LCDRenderer{
 				} else {
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getSmallFont());
-					lcd.drawString("" + Math.round(ob*100), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= 0.75f);
+					lcd.drawString(tile.getEmpty() + "" + tile.getViewed(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= 0.75f);
 					lcd.setFont(f);
 				}
 			}

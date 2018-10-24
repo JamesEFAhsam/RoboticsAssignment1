@@ -49,7 +49,7 @@ public class Map {
 		}
 	}
 	
-	public void updateTile(int x, int y, boolean isEmpty){
+	public void updateTile(int x, int y, boolean isEmpty, float percentage){
 		Tile tile = getTile(x, y);
 		if(tile == null)
 			return;
@@ -94,6 +94,43 @@ public class Map {
 	
 	private void updateRobotTile(){
 		this.tiles[robotX][robotY].visit();
+	}
+	
+	public void updateMap(int heading, float F, float L, float R){
+		int forwardheading = heading;
+		int leftheading = heading+1;
+		int rightheading = heading-1;
+		
+		if(leftheading < 0)
+			leftheading = 3;
+		
+		if(rightheading > 3)
+			rightheading = 0;
+		
+		updateTiles(forwardheading, F);
+		updateTiles(leftheading, L);
+		updateTiles(rightheading, R);
+	}
+	
+	public void updateTiles(int heading, float tiles){
+		int dx = 0, dy = 0;
+		
+		if(heading == 0)
+			dy = 1;
+		if(heading == 1)
+			dx = 1;
+		if(heading == 2)
+			dy = -1;
+		if(heading == 3)
+			dx = -1;
+		
+		int dW = (int) Math.round(tiles/.25f)+1;
+		
+		for (int i = 0; i < this.tiles.length; i++) {
+			updateTile(getRobotX()+(i*dx), getRobotY()+(i*dy), (i>=dW), (float) Math.pow(.5, i));
+			if(i>=dW)
+				break;
+		}
 	}
 	
 	public void moveRobotPos(int dX, int dY) {
