@@ -62,9 +62,7 @@ public class AStarSearch {
 							index++;
 						}
 						
-					}
-					
-					
+					}		
 					
 				}
 			}
@@ -77,7 +75,7 @@ public class AStarSearch {
 	
 		LinkedList<Tile> path = new LinkedList<Tile>();
 		//need to do a for loop or till current tile = start.
-		for (Tile tile : cameFrom) {
+		for (Tile tile : closedSet) {
 			path.push(tile);
 		}
 		return path;
