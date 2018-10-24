@@ -57,10 +57,10 @@ public class UltrasonicSensorMonitor extends Thread{
 	
 	public float getAssuredDistance(){
 		float avg = 0;
-		for (int i = 0; i < distance.length; i++) {
+		for (int i = 0; i < amount; i++) {
 			avg += distance[i];
 		}
-		return avg;
+		return avg/amount;
 	}
 	
 	public UltrasonicSensorMonitor rotate(int degrees){

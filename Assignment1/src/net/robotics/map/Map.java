@@ -105,8 +105,8 @@ public class Map {
 	
 	public void updateMap(int heading, float F, float L, float R){
 		int forwardheading = heading;
-		int leftheading = heading+1;
-		int rightheading = heading-1;
+		int leftheading = heading-1;
+		int rightheading = heading+1;
 		
 		if(leftheading < 0)
 			leftheading = 3;

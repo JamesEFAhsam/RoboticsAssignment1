@@ -4,6 +4,9 @@ package net.robotics.main;
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
 import lejos.robotics.navigation.Pose;
+import lejos.hardware.Button;
+import lejos.hardware.lcd.Font;
+import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
@@ -23,9 +26,6 @@ public class Localisation {
 	
 	// Need to add "Position confidence"
 	// Need to add "Orient confidence"
-	
-	private int rX = Robot.current.getMap().getRobotX();
-	private int rY = Robot.current.getMap().getRobotY();
 	
 	public enum dHeadingPosition {
 		Top, Right, Down, Left
@@ -128,6 +128,7 @@ public class Localisation {
 		int initialHeading = Robot.current.getMap().getRobotHeading();	// Save initial heading
 		boolean[] foundEdges = findEdges();						// Look for edges
 		
+		
 		if (foundEdges[initialHeading]) {						// Check if we are already facing edge
 			alignWithEdge();
 			return true;
@@ -157,8 +158,8 @@ public class Localisation {
 		// Check each neighbour
 		for(int i = 0; i<4; i++) {
 			//Neighbour coordinates
-			int nX = rX + neighbourOffsets[i][0];
-			int nY = rY + neighbourOffsets[i][1];
+			int nX = Robot.current.getMap().getRobotX() + neighbourOffsets[i][0];
+			int nY = Robot.current.getMap().getRobotY() + neighbourOffsets[i][1];
 			
 			int mWidth = Robot.current.getMap().getWidth();
 			int mHeight = Robot.current.getMap().getHeight();
@@ -187,12 +188,30 @@ public class Localisation {
 		SampleProvider leftTouch = Robot.current.getLeftTouch();
 		SampleProvider rightTouch = Robot.current.getRightTouch();
 		
+		
+		
 		pilot.forward();
-		while(leftSample[0] < 0.9 && rightSample[0] < 0.9) {
+		while((leftSample[0] < 0.9 || rightSample[0] < 0.9)) {
 			leftTouch.fetchSample(leftSample, 0);
 	    	rightTouch.fetchSample(rightSample, 0);
+	    	
+	    	Robot.current.screen.clearScreen();
+	    	Robot.current.screen.writeTo(new String[]{
+					"H: " + leftSample[0],
+					"0: " + rightSample[0],
+			}, 0, 60, GraphicsLCD.LEFT, Font.getSmallFont());
+	    	
+	    	if(Button.ESCAPE.isDown()){
+	    		System.exit(0);
+	    	}
 		}
 		pilot.stop();
+		
+		Robot.current.screen.writeTo(new String[]{
+				"H: " + leftSample[0],
+				"0: " + rightSample[0],
+		}, 0, 60, GraphicsLCD.LEFT, Font.getSmallFont());
+		
 		pilot.travel(-4);
 	}
 	
