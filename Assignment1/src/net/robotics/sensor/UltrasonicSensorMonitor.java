@@ -1,5 +1,7 @@
 package net.robotics.sensor;
 
+import lejos.hardware.lcd.Font;
+import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
@@ -12,8 +14,8 @@ public class UltrasonicSensorMonitor extends Thread{
 	private NXTRegulatedMotor motor;
 	private float[] sample;
 	
-	private float distance[];
-	private int pointer;
+	public float distance[];
+	public int pointer;
 	
 	private int amount;
 	
@@ -58,7 +60,7 @@ public class UltrasonicSensorMonitor extends Thread{
 		for (int i = 0; i < distance.length; i++) {
 			avg += distance[i];
 		}
-		return .5f;
+		return avg;
 	}
 	
 	public UltrasonicSensorMonitor rotate(int degrees){
@@ -91,6 +93,9 @@ public class UltrasonicSensorMonitor extends Thread{
 				pointer = 0;
 			
 			amount++;
+			
+			
+			
 			try{
 				sleep(Delay);
 			} catch(Exception e){
