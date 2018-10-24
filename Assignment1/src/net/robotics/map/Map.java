@@ -4,14 +4,16 @@ public class Map {
 	private Tile[][] tiles;
 	private int width, height;
 	private int robotX, robotY;
+	private int robotHeading;
 	
 	public Map(int width, int height){
 		this.setWidth(width);
 		this.setHeight(height);
 		this.setTiles(width, height);
-		this.setRobotPos(0, 0);
+		this.setRobotPos(0, 0, 0);		//(x, y, heading)
 		updateRobotTile();
 	}
+	
 
 	public Tile[][] getTiles() {
 		return tiles;
@@ -85,10 +87,15 @@ public class Map {
 	public int getRobotY() {
 		return robotY;
 	}
+	
+	public int getRobotHeading() {
+		return robotHeading;
+	}
 
-	public void setRobotPos(int robotX, int robotY) {
+	public void setRobotPos(int robotX, int robotY, int robotHeading) {
 		this.robotX = robotX;
 		this.robotY = robotY;
+		this.robotHeading = robotHeading;
 		updateRobotTile();
 	}
 	

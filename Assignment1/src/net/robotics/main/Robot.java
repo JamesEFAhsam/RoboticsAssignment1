@@ -3,8 +3,6 @@ package net.robotics.main;
 import java.util.Dictionary;
 import java.util.HashMap;
 
-import org.omg.PortableInterceptor.PolicyFactoryOperations;
-
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -14,15 +12,20 @@ import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
+import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.internal.ev3.EV3LED;
 import lejos.robotics.chassis.Chassis;
 import lejos.robotics.chassis.Wheel;
 import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
+import lejos.robotics.navigation.Pose;
+import lejos.robotics.SampleProvider;
 import net.robotics.map.Map;
+import net.robotics.map.Tile;
 import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
@@ -46,13 +49,29 @@ public class Robot {
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
+	
+	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
+	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
+	
+	private static EV3TouchSensor leftBumper = new EV3TouchSensor(leftBumpPort);
+	private static EV3TouchSensor rightBumper = new EV3TouchSensor(rightBumpPort);
+	
+	private static SampleProvider leftTouch = leftBumper.getMode("Touch");
+	private static SampleProvider rightTouch = rightBumper.getMode("Touch");
+	
+	private static float[] leftSample = new float[leftTouch.sampleSize()];
+	private static float[] rightSample = new float[rightTouch.sampleSize()];
+	
+	public static Robot current;
+	
+	
 
 	public static void main(String[] args){
-		Robot cs = new Robot();
+		current = new Robot();
 
-		cs.mainLoop();
+		current.mainLoop();
 
-		cs.closeRobot();
+		current.closeRobot();
 	}
 
 	public Robot() {
@@ -99,6 +118,9 @@ public class Robot {
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
 	}
+	
+	
+	
 
 	public void closeProgram(){
 		closeRobot();
@@ -117,6 +139,7 @@ public class Robot {
 
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
+
 
 		while(!Button.ESCAPE.isDown() && squares < 20){
 			screen.clearScreen();
@@ -175,8 +198,6 @@ public class Robot {
 					visitOverride = true;
 				}
 			}
-			
-			
 
 			
 
@@ -252,11 +273,61 @@ public class Robot {
 			pilot.travel(direction*12f);
 		}
 	}
+	
+	public void turnToHeading(int desiredHeading) {
+		int initialHeading = map.getRobotHeading();
+		int headingDifference = desiredHeading - initialHeading;
+		int rotationAmount = 0;
+		switch(headingDifference) {
+			case 1: 
+			case -3:
+				rotationAmount = 90;
+				break;
+			case 2: 
+			case -2:
+				rotationAmount = 180;
+				break;
+			case -1:
+			case 3:
+				rotationAmount = -90;
+				break;
+		}
+		pilot.rotate(rotationAmount);
+		map.setRobotPos(map.getRobotX(), map.getRobotY(), desiredHeading);
+	}
 
 	public LCDRenderer getScreen(){
 		return screen;
 	}
 
 	public void closeRobot(){
+	}
+	
+	public OdometryPoseProvider getOpp() {
+		return opp;
+	}
+	
+	public Map getMap() {
+		return map;
+	}
+
+	public MovePilot getPilot() {
+		return pilot;
+	}
+	
+	public float[] getLeftSample() {
+		return leftSample;
+	}
+	
+	public float[] getRightSample() {
+		return rightSample;
+	}
+	
+	public SampleProvider getLeftTouch() {
+		return leftTouch;
+	}
+	
+	public SampleProvider getRightTouch() {
+		return rightTouch;
 	}
 }
