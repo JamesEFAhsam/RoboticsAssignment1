@@ -1,85 +1,76 @@
 package net.robotics.map;
 //import net.robotics.map.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 import net.robotics.main.Robot;
 
 public class AStarSearch {
 	
-	protected ArrayList<Tile[]> openSet, closedSet, cameFrom;
+	protected ArrayList<Tile> openSet, closedSet, cameFrom, path;
 	public PriorityQueue<Tile> queue;
-	protected Tile[] start, goal;
 	protected double g_Score, H_score;
 	protected int width, empty, height;
 	protected Map arena;
-	protected Path pth;
-	protected Tile[][] grid;
+	//protected Path pth;
 	
-	public AStarSearch(Map arena, Tile start, Tile goal) {
-		this.start = start;
-		this.goal = goal;
+	public AStarSearch(Map arena) {
 		arena = new Map(width, height);
-		ArrayList<Tile[]> openSet = new ArrayList<Tile[]>();
-		openSet.add(start);
-		Tile[][] grid = arena.getTiles();
+		ArrayList<Tile> openSet = new ArrayList<Tile>();
  		
 	}
 	
-	public void searchForPath() {
+	public LinkedList<Tile> searchForPath(Tile start, Tile goal) {
+		openSet.clear();
+		
 		arena.getTiles();
+		openSet.add(start);
 		while (!openSet.isEmpty()) {
-			Tile[] currentTile = openSet.get(0);	
+			Tile currentTile = openSet.get(0);	
 			if (currentTile == goal) return reconstructPath();
 			
 			openSet.remove(0);
 			closedSet.add(currentTile);
 			
-			for (Tile[] neighbour : grid) {
-				if (neighbour == currentTile) return;
-				
-				calculateG(currentTile);
-				calculateH(currentTile);
-				
-				double f_Score = calculateG(currentTile) + calculateH(goal);
-				
-				
-				
-				
-				
+			
+			
+			for (int x = 0; x < arena.getWidth(); x++) {
+				for (int y = 0; y < arena.getHeight(); y++) {
+					Tile neighbour = arena.getTile(x, y);
+					
+					if (neighbour == currentTile) break;
+					
+					double g = calculateManhatten(currentTile);
+					double h = calculateManhatten(currentTile);
+					
+					double f_Score = g + calculateManhatten(goal);
+					
+				}
 			}
 			
 		}
+		return null;
 	}
 	
-	public Tile[][] reconstructPath() {
+	public LinkedList<Tile> reconstructPath() {
 		
-		Tile[][] path;
-		
-		while (camefrom.has(currentTile)) {
-			currentTile = camefrom(currentTile);
-			path.add(currentTile);
+		LinkedList<Tile> path = new LinkedList();
+		//need to do a for loop or til current tile = start.
+		for (Tile tile : cameFrom) {
+			path.push(tile);
 		}
 		return path;
 		
 		
 	}
 	
-	public double calculateG(Tile[] nextTile) {
-		double xDistance = Robot.x - nextTile.x;
-		double yDistance = Robot.y - nextTile.y;
+	public double calculateManhatten(Tile nextTile) {
+		double xDistance = arena.getRobotX() - nextTile.getX();
+		double yDistance = arena.getRobotY() - nextTile.getY();
 		double distance = Math.sqrt( (xDistance*xDistance) + (yDistance*yDistance));		
 		return distance;
 		
 	}
-	
-	protected double calculateH(Tile[] targetTile) {
-		return calculateG(targetTile);
-	}
-	
-	protected float getF_Score(){
-		return g_score + h_score;
-	}
-	
-	
 }
