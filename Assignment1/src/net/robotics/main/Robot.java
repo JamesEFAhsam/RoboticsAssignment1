@@ -50,7 +50,7 @@ public class Robot {
 	private OdometryPoseProvider opp;
 	private Map map;
 	
-	public final float _OCCUPIEDBELIEFCUTOFF = 0.9f;
+	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
 	
 	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
 	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
@@ -129,14 +129,27 @@ public class Robot {
 
 	public void mainLoop(){
 		int squares = 0;
+		/*
 		ColorNames prevColor = colorSensor.getColor();
 
 		pilot.setLinearSpeed(10);
 
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+		*/
+		Localisation localisation = new Localisation();
+		screen.clearScreen();
+		screen.clearScreen();
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+
+		//map.setRobotPos(3, 4, 3);
+		//map.getTile(3, 5).view(false);
+		localisation.localiseOrientation();
+
+		
 
 		 while(!Button.ESCAPE.isDown() && squares < 6 ){
+			 /*
 			screen.clearScreen();
 			if(map.canMove(map.getRobotX(), map.getRobotY()+1)){
 				
@@ -162,6 +175,7 @@ public class Robot {
 				squares++;
 				//pilot.rotate(90);
 			}
+			*/
 
 			
 
@@ -187,6 +201,7 @@ public class Robot {
 			*/
 
 			Button.waitForAnyPress();
+			
 		}
 	}
 
@@ -197,7 +212,7 @@ public class Robot {
 			do{
 				cn = colorSensor.getCurrentColor();
 			}while(cn != ColorNames.BLACK);
-			pilot.travel(10f);
+			pilot.travel(12.5f);
 		}
 	}
 	
