@@ -134,7 +134,7 @@ public class Map {
 		int dW = (int) Math.round(tiles/.25f)+1;
 		
 		for (int i = 0; i < this.tiles.length; i++) {
-			updateTile(getRobotX()+(i*dx), getRobotY()+(i*dy), (i>=dW), (float) Math.pow(.5, i));
+			updateTile(getRobotX()+(i*dx), getRobotY()+(i*dy), !(i>=dW), (float) Math.pow(.5, i));
 			if(i>=dW)
 				break;
 		}
