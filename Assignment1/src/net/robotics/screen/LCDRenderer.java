@@ -222,16 +222,17 @@ public class LCDRenderer{
 				}else {
 					lcd.drawRect(x+(tile.getX()*16), y+(tile.getY()*16), 16, 16);
 				}
+
 				
 				if(g == map.getRobotX() && u == map.getRobotY()){
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getDefaultFont());
-					lcd.drawChar('R', x+(tile.getX()*16) , y+(tile.getY()*16) , GraphicsLCD.VCENTER);
+					lcd.drawChar('R', x+(tile.getX()*16) , y+(map.getHeight()*16)-(tile.getY()*16) , GraphicsLCD.VCENTER);
 					lcd.setFont(f);
 				} else {
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getSmallFont());
-					lcd.drawString("" + Math.round(ob*100), x+(tile.getX()*16) + 2, y+(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
+					lcd.drawString(, x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
 					lcd.setFont(f);
 				}
 			}
