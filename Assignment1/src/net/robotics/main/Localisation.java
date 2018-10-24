@@ -35,7 +35,7 @@ public class Localisation {
 			{0,1}, // Above 	[0]
 			{1,0}, // To right	[1]
 			{0,-1},// Below 	[2]
-			{-1,0},// To left	[3]	
+			{-1,0},// To left	[3]
 	};
 	
 	public void localisePosition() {
@@ -52,7 +52,7 @@ public class Localisation {
 		switch(nFoundEdges) {
 			case 3:
 			case 2:
-				localisePosition2Edges(foundEdges);	// If 2 or 3 edges, localise against 2 edges
+				localisePosition2Edges(foundEdges, nFoundEdges);	// If 2 or 3 edges, localise against 2 edges
 				break;
 			case 1:
 				localisePosition1Edge(foundEdges);	// If 1 edge, localise against 1 edge, one space
@@ -63,36 +63,65 @@ public class Localisation {
 		}
 	}
 	
-	public void localisePosition2Edges(boolean[] foundEdges) {
+	public void localisePosition2Edges(boolean[] foundEdges, int nFoundEdges) {
 		int initialHeading = Robot.current.getMap().getRobotHeading();
 		int xLocaliseCell;
 		int yLocaliseCell;
 		
-		if(foundEdges[0] == true) {
-			yLocaliseCell = 0;
-		} else yLocaliseCell = 2;
-		
-		if(foundEdges[1] == true) {
-			xLocaliseCell = 1;
-		} else xLocaliseCell = 3;
-		
-		Robot.current.turnToHeading(yLocaliseCell);
-		alignWithEdge();
-		Robot.current.turnToHeading(xLocaliseCell);
-		alignWithEdge();
-		Robot.current.turnToHeading(initialHeading);
+		// If there are 2 edges and they are opposite each other, use the 1 edge method
+		if( nFoundEdges == 2 && ((foundEdges[1]==true && foundEdges[3]==true) || (foundEdges[0]==true && foundEdges[2]==true)) ) {
+			localisePosition1Edge(foundEdges);
+		} else {
+			if(foundEdges[0] == true) {
+				yLocaliseCell = 0;
+			} else yLocaliseCell = 2;
+			
+			if(foundEdges[1] == true) {
+				xLocaliseCell = 1;
+			} else xLocaliseCell = 3;
+			
+			Robot.current.turnToHeading(yLocaliseCell);
+			alignWithEdge();
+			Robot.current.turnToHeading(xLocaliseCell);
+			alignWithEdge();
+			Robot.current.turnToHeading(initialHeading);
+		}
 	}
 	
 	public void localisePosition1Edge(boolean[] foundEdges) {
 		int initialHeading = Robot.current.getMap().getRobotHeading();
-		int xLocaliseCell;
-		int yLocaliseCell;
+		boolean xLocaliseCellFound = false;
+		boolean yLocaliseCellFound = false;
+		
+		for(int i=0; i<4; i++) {
+			if (foundEdges[i]) {
+				if(i==1 || i==3) {
+					xLocaliseCellFound = true;
+					Robot.current.turnToHeading(i);
+					alignWithEdge();
+					break;
+				} else {
+					yLocaliseCellFound = true;
+					Robot.current.turnToHeading(i);
+					alignWithEdge();
+					break;
+				}
+			}
+		}
+		// If we've already localised against x, localise for y, vice versa
+		if (xLocaliseCellFound) {
+			// Localise for y using colour. 
+		} else {
+			// Localise for x using colour. 
+		}
 	}
 
 	public void localisePositionNoEdges(boolean[] foundEdges) {
 		int initialHeading = Robot.current.getMap().getRobotHeading();
-		int xLocaliseCell;
-		int yLocaliseCell;
+		
+		// Localise in current heading using colour
+		
+		// Localise adjacent to current heading using colour
 	}
 	
 	public boolean localiseOrientation() {
