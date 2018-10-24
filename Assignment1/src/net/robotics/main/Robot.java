@@ -146,12 +146,14 @@ public class Robot {
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
 		*/
 		Localisation localisation = new Localisation();
+		
+		map.setRobotPos(3, 4, 3);
+		map.getTile(3, 5).view(false);
+		
 		screen.clearScreen();
-		screen.clearScreen();
-		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
-		//map.setRobotPos(3, 4, 3);
-		//map.getTile(3, 5).view(false);
+		
 		localisation.localiseOrientation();
 
 		
@@ -171,9 +173,9 @@ public class Robot {
 				ultrasonicSensor.resetMotor();	
 				
 				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
-				/*screen.writeTo(new String[]{
+				screen.writeTo(new String[]{
 						"V: " + visitOverride
-				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 				
 				
 
@@ -191,7 +193,7 @@ public class Robot {
 						"F: " + F,
 						"L: " + L,
 						"R: " + R
-				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 				
 				visitOverride = false;
 				amount = 0;
@@ -214,8 +216,8 @@ public class Robot {
 					visitOverride = true;
 				}
 			}
-			*/
-
+			
+			  */
 			
 
 			//screen.clearScreen();
