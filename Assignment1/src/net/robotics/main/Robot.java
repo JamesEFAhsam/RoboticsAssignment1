@@ -3,6 +3,9 @@ package net.robotics.main;
 import java.util.Dictionary;
 import java.util.HashMap;
 
+import behaviours.AStar;
+import behaviours.IceSlideBehavior;
+import behaviours.LocaliseBehavior;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -23,6 +26,8 @@ import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
 import lejos.robotics.navigation.Pose;
+import lejos.robotics.subsumption.Arbitrator;
+import lejos.robotics.subsumption.Behavior;
 import lejos.robotics.SampleProvider;
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
@@ -49,6 +54,8 @@ public class Robot {
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
+	private Localisation localisation;
+	private Arbitrator arbitrator;
 	
 	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
 	
@@ -64,26 +71,26 @@ public class Robot {
 	private static float[] leftSample = new float[leftTouch.sampleSize()];
 	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
+	private LocaliseBehavior b1;
+	private IceSlideBehavior b2;
+	private AStar b3;
+	
 	public static Robot current;
 	
-	
+
 
 	public static void main(String[] args){
 		current = new Robot();
-
 		current.mainLoop();
-
 		current.closeRobot();
 	}
 
 	public Robot() {
 		Brick myEV3 = BrickFinder.getDefault();
-
 		led = (EV3LED) myEV3.getLED();
-
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
-
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
+		localisation = new Localisation();
 		
 		NXTRegulatedMotor motor = null;
 		EV3UltrasonicSensor ultra = null;
@@ -97,12 +104,12 @@ public class Robot {
 			}
 		}
 		
-		
 		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
 				ultra, 
 				motor, 60);
 		
 		setUpRobot();
+		setUpBehaviors();
 
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
@@ -112,8 +119,14 @@ public class Robot {
 		colorSensor.start();
 		
 		ultrasonicSensor.start();
-
-
+	}
+	
+	private void setUpBehaviors() {
+		b1 = new LocaliseBehavior(current);
+		b2 = new IceSlideBehavior(current);
+		b3 = new AStar(current);
+		Behavior[] behaviors = {b3,b2,b1};			// Behavior priority, where [0] is lowest priority
+		arbitrator = new Arbitrator(behaviors, false); // NEED TO ADD BEHAVIORS HERE
 	}
 
 	private void setUpRobot(){
@@ -121,10 +134,10 @@ public class Robot {
 
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
+		
+		//arbitrator.go();		// Comment this out to use mainLoop(), or uncomment this 
+								// and comment out mainLoop() to start arbitrator. 
 	}
-	
-	
-	
 
 	public void closeProgram(){
 		closeRobot();
@@ -132,20 +145,25 @@ public class Robot {
 	}
 
 	public void mainLoop(){
+		// TO DO
+		// Need to move this into IceSlide behavior. James? 
 		int squares = 0;
-		/*
+		
 		ColorNames prevColor = colorSensor.getColor();
 		
-		int heading = 0; // 0 Forward, Right, Back, Left
 		int amount = 0;
 		boolean visitOverride = false; 
 
 		pilot.setLinearSpeed(10);
+		
+		/*map.setRobotPos(2, 0, 0);
+		//map.updateMap(3, 0.1f, 0.1f, 0.1f);
+		//map.updateTiles(2, 0.1f);
 
 		screen.clearScreen();
-		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, 8, map);
-		*/
-		Localisation localisation = new Localisation();
+		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);*/
+		
+		//Button.waitForAnyPress();
 		
 		map.setRobotPos(3, 4, 3);
 		map.getTile(3, 5).view(false);
@@ -153,13 +171,11 @@ public class Robot {
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
-		
-		localisation.localiseOrientation();
 
-		
+		Button.waitForAnyPress();
 
 		 while(!Button.ESCAPE.isDown() && squares < 6 ){
-			 /*
+			 
 			screen.clearScreen();
 			
 			
@@ -167,24 +183,22 @@ public class Robot {
 			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 			
 			
-			if((!map.beenVisited(heading) || visitOverride) && map.canMove(heading)){
+			if((!map.beenVisited(map.getRobotHeading()) || visitOverride) && map.canMove(map.getRobotHeading())){
 				
-				observe(heading);
-				ultrasonicSensor.resetMotor();	
+				observe(map.getRobotHeading());
 				
 				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
-				screen.writeTo(new String[]{
+				/*screen.writeTo(new String[]{
 						"V: " + visitOverride
-				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 				
 				
 
 				MoveSquares(1);
 				
-				map.moveRobotPos(heading);
+				map.moveRobotPos(map.getRobotHeading());
 				
-				observe(heading);
-				ultrasonicSensor.resetMotor();	
+				observe(map.getRobotHeading());
 				
 				screen.clearScreen();
 				
@@ -193,7 +207,7 @@ public class Robot {
 						"F: " + F,
 						"L: " + L,
 						"R: " + R
-				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+				}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 				
 				visitOverride = false;
 				amount = 0;
@@ -201,14 +215,11 @@ public class Robot {
 				
 			} else {
 				
-				pilot.rotate(90);
+				turnToHeading(map.getRobotHeading()+1);
 
-				observe(heading);
-				ultrasonicSensor.resetMotor();	
+				observe(map.getRobotHeading());
 
-				heading++;
-				if(heading > 3)
-					heading = 0;
+				
 
 				amount++;
 				if(amount >= 4){
@@ -217,7 +228,7 @@ public class Robot {
 				}
 			}
 			
-			  */
+			
 			
 
 			//screen.clearScreen();
@@ -241,56 +252,72 @@ public class Robot {
 			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
 			*/
 
-			Button.waitForAnyPress();
+			
 			//Button.waitForAnyPress();
 		}
 	}
 	
-	private void observe(int heading){
-		ultrasonicSensor.clear();
+	public void observe(int heading){
+		/*ultrasonicSensor.clear();
+		try {
+			Thread.sleep(60*5);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
-		//ultrasonicSensor.getAssuredDistance();
-		/*
+		ultrasonicSensor.getAssuredDistance();
+		
 		Robot.current.screen.writeTo(new String[]{
-				"P: " + ultrasonicSensor.pointer + "/" + ultrasonicSensor.distance[ultrasonicSensor.pointer]
-		}, 0, 100, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+				"P: " + ultrasonicSensor.distance[0],
+				"P: " + ultrasonicSensor.distance[1],
+				"P: " + ultrasonicSensor.distance[2],
+				"P: " + ultrasonicSensor.distance[3],
+				"P: " + ultrasonicSensor.distance[4],
+		}, 0, 75, GraphicsLCD.LEFT, Font.getSmallFont());
 		
 		screen.writeTo(new String[]{
 				"F: " + ultrasonicSensor.getAssuredDistance()
 		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
-		
+		*/
 		ultrasonicSensor.clear();
 		try {
-			Thread.sleep(60*5);
+			Thread.sleep(60*6);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		float F = ultrasonicSensor.getDistance();
-		ultrasonicSensor.clear();
 		try {
-			Thread.sleep(60*5);
+			Thread.sleep(60*6);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		float L = ultrasonicSensor.rotate(90).getDistance();
-		ultrasonicSensor.clear();
+		ultrasonicSensor.clear().rotate(90);
 		try {
-			Thread.sleep(60*5);
+			Thread.sleep(60*6);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		float R = ultrasonicSensor.rotate(-180).getDistance();
+		float L = ultrasonicSensor.getDistance();
+		ultrasonicSensor.clear().rotate(-180);
+		try {
+			Thread.sleep(60*6);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		float R = ultrasonicSensor.getDistance();
 		
-		/*screen.writeTo(new String[]{
+		screen.writeTo(new String[]{
 				"F: " + F,
 				"L: " + L,
 				"R: " + R,
-		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());/*/
+				"H: " + heading
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 		
 		map.updateMap(heading, F, L, R);
+		ultrasonicSensor.resetMotor();	
 	}
 
-	private void MoveSquares(int i){
+	public void MoveSquares(int i){
 		int direction = (i/Math.abs(i));
 		
 		for (int j = 0; j < i; j++) {
@@ -302,7 +329,7 @@ public class Robot {
 			do{
 				cn = colorSensor.getCurrentColor();
 			}while(cn != ColorNames.BLACK);
-			pilot.travel(12.5f);
+			pilot.travel(11.0f);
 		}
 	}
 	
@@ -325,6 +352,12 @@ public class Robot {
 				break;
 		}
 		pilot.rotate(rotationAmount);
+		
+		if(desiredHeading > 3)
+			desiredHeading = 0;
+		if(desiredHeading < 0)
+			desiredHeading = 3;
+		
 		map.setRobotPos(map.getRobotX(), map.getRobotY(), desiredHeading);
 	}
 
@@ -361,5 +394,13 @@ public class Robot {
 	
 	public SampleProvider getRightTouch() {
 		return rightTouch;
+	}
+	
+	public ColorSensorMonitor getColorSensor() {
+		return colorSensor;
+	}
+	
+	public Localisation getLocalisation() {
+		return localisation;
 	}
 }

@@ -3,7 +3,14 @@ package net.robotics.main;
 
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
+import net.robotics.sensor.ColorSensorMonitor.ColorNames;
+import lejos.hardware.sensor.EV3ColorSensor;
+import net.robotics.sensor.ColorSensorMonitor;
+import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 import lejos.robotics.navigation.Pose;
+import lejos.hardware.Button;
+import lejos.hardware.lcd.Font;
+import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
@@ -24,8 +31,10 @@ public class Localisation {
 	// Need to add "Position confidence"
 	// Need to add "Orient confidence"
 	
-	private int rX = Robot.current.getMap().getRobotX();
-	private int rY = Robot.current.getMap().getRobotY();
+	private float oriConfidence; 	//Orientation confidence. 
+	private float posiConfidence;	//Position confidence.
+	public final float _ORITHRESHOLD = 0.7f; //	NEEDS CALIBRATING
+	public final float _POSITHRESHOLD = 0.7f;// NEEDS CALIBRATING
 	
 	public enum dHeadingPosition {
 		Top, Right, Down, Left
@@ -38,7 +47,12 @@ public class Localisation {
 			{-1,0},// To left	[3]
 	};
 	
-	public void localisePosition() {
+	public Localisation() {
+		oriConfidence = 1.0f;
+		posiConfidence = 1.0f;
+	}
+	
+	public void localiseRobot() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();
 		boolean[] foundEdges = findEdges();
 		int nFoundEdges = 0;
@@ -49,84 +63,112 @@ public class Localisation {
 		}
 		
 		// Localisation method depends upon number of edges
+		// If edges are opposite one another, we can only localise w.r.t. one axis
+		// So we localise using 1 edge instead, and one space. 
 		switch(nFoundEdges) {
 			case 3:
-			case 2:
-				localisePosition2Edges(foundEdges, nFoundEdges);	// If 2 or 3 edges, localise against 2 edges
+				localise2Edges(foundEdges);
 				break;
+			case 2: 
+				if ((foundEdges[1]==true && foundEdges[3]==true) || (foundEdges[0]==true && foundEdges[2]==true)) {
+					localise1Edge(foundEdges);
+					break;
+				} else {
+					localise2Edges(foundEdges);
+					break;
+				}
 			case 1:
-				localisePosition1Edge(foundEdges);	// If 1 edge, localise against 1 edge, one space
+				localise1Edge(foundEdges);
 				break;
 			case 0:
-				localisePositionNoEdges(foundEdges);// If 0 edges, localise against 2 spaces
+				localise0Edge(foundEdges);
 				break;
 		}
 	}
 	
-	public void localisePosition2Edges(boolean[] foundEdges, int nFoundEdges) {
-		int initialHeading = Robot.current.getMap().getRobotHeading();
-		int xLocaliseCell;
-		int yLocaliseCell;
-		
-		// If there are 2 edges and they are opposite each other, use the 1 edge method
-		if( nFoundEdges == 2 && ((foundEdges[1]==true && foundEdges[3]==true) || (foundEdges[0]==true && foundEdges[2]==true)) ) {
-			localisePosition1Edge(foundEdges);
-		} else {
-			if(foundEdges[0] == true) {
-				yLocaliseCell = 0;
+		// If 2 or more perpendicular edges, use this method
+		// Localises X position, Y position, and orientation
+		// Localises using 2 edges
+		public void localise2Edges(boolean[] foundEdges) {
+			int initialHeading = Robot.current.getMap().getRobotHeading();
+			int xLocaliseCell;
+			int yLocaliseCell;
+			
+			if(foundEdges[0] == true) {		// We know the edges are perpendicular, and we have at least 2
+				yLocaliseCell = 0;			// So if it's not one, it is the other
 			} else yLocaliseCell = 2;
 			
 			if(foundEdges[1] == true) {
 				xLocaliseCell = 1;
 			} else xLocaliseCell = 3;
 			
-			Robot.current.turnToHeading(yLocaliseCell);
-			alignWithEdge();
-			Robot.current.turnToHeading(xLocaliseCell);
-			alignWithEdge();
-			Robot.current.turnToHeading(initialHeading);
+			Robot.current.turnToHeading(yLocaliseCell);		// Turn to y cell
+			alignWithEdge();								// y position now localised
+			Robot.current.turnToHeading(xLocaliseCell);		// turn to x cell
+			alignWithEdge();								// x position now localised
+			Robot.current.turnToHeading(initialHeading);	// return to initial pose
+			
+			posiConfidence = 1.0f;			// 100% confidence of position
 		}
-	}
-	
-	public void localisePosition1Edge(boolean[] foundEdges) {
-		int initialHeading = Robot.current.getMap().getRobotHeading();
-		boolean xLocaliseCellFound = false;
-		boolean yLocaliseCellFound = false;
 		
-		for(int i=0; i<4; i++) {
-			if (foundEdges[i]) {
-				if(i==1 || i==3) {
-					xLocaliseCellFound = true;
-					Robot.current.turnToHeading(i);
-					alignWithEdge();
-					break;
-				} else {
-					yLocaliseCellFound = true;
-					Robot.current.turnToHeading(i);
-					alignWithEdge();
-					break;
-				}
+		
+		
+		// If 1 edge or 2 opposite edges, use this method
+		// Localises X position, Y position, and orientation
+		// Localises using 1 edge, and 1 space
+		public void localise1Edge(boolean[] foundEdges) {
+			int initialHeading = Robot.current.getMap().getRobotHeading();
+			int xLocaliseCell;
+			int yLocaliseCell;
+			
+			for (int i=0; i<4; i++) {
+				 if(foundEdges[i]) {									// If edge is present,
+					 if (i == 0 || i == 2) {							// and if edge is top or bottom
+						 yLocaliseCell = i;								// Set yLocalise cell to it
+						 xLocaliseCell = 1;								// Set xLocalise as left or right (both empty)
+						 Robot.current.turnToHeading(yLocaliseCell);	// Turn to yLocalise cell and 
+						 alignWithEdge();								// Align to edge and localise y position
+						 Robot.current.turnToHeading(xLocaliseCell);	// Turn to xLocalise cell and
+						 alignGridLine();								// Align to grid line and localise x position
+						 Robot.current.turnToHeading(initialHeading);
+						 break;
+					 } else {											// Otherwise edge is left or right
+						 xLocaliseCell = i;								// Set xLocalise cell to it
+						 yLocaliseCell = 0;								// Set yLocalise as top or bottom (both empty)
+						 Robot.current.turnToHeading(xLocaliseCell);	// turn to xLocalise cell and
+						 alignWithEdge();								// Align to edge and localise x position
+						 Robot.current.turnToHeading(yLocaliseCell);	// Turn to yLocalise cell
+						 alignGridLine();								// Align to grid line and localise y position
+						 Robot.current.turnToHeading(initialHeading);
+						 break;
+					 }
+				 }
 			}
+			posiConfidence = 1.0f;
 		}
-		// If we've already localised against x, localise for y, vice versa
-		if (xLocaliseCellFound) {
-			// Localise for y using colour. 
-		} else {
-			// Localise for x using colour. 
+		
+		
+		
+		// If no edges, use this method
+		// Localises X position and Y position
+		// Localises using 2 spaces
+		public void localise0Edge(boolean[] foundEdges) {
+			int initialHeading = Robot.current.getMap().getRobotHeading();
+			
+			Robot.current.turnToHeading(0);					// Turn to yLocalise cell and 
+			alignGridLine();								// Align to grid and localise y position
+			Robot.current.turnToHeading(1);					// Turn to xLocalise cell and
+			alignGridLine();								// Align to grid line and localise x position
+			Robot.current.turnToHeading(initialHeading);
+			
+			posiConfidence = 1.0f;
 		}
-	}
 
-	public void localisePositionNoEdges(boolean[] foundEdges) {
-		int initialHeading = Robot.current.getMap().getRobotHeading();
-		
-		// Localise in current heading using colour
-		
-		// Localise adjacent to current heading using colour
-	}
 	
 	public boolean localiseOrientation() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();	// Save initial heading
 		boolean[] foundEdges = findEdges();						// Look for edges
+		
 		
 		if (foundEdges[initialHeading]) {						// Check if we are already facing edge
 			alignWithEdge();
@@ -149,7 +191,6 @@ public class Localisation {
 	}
 	
 	
-	
 	// Return edges next to the robot that can be localised against
 	public boolean[] findEdges() {
 		boolean[] foundEdges = new boolean[4];
@@ -157,8 +198,8 @@ public class Localisation {
 		// Check each neighbour
 		for(int i = 0; i<4; i++) {
 			//Neighbour coordinates
-			int nX = rX + neighbourOffsets[i][0];
-			int nY = rY + neighbourOffsets[i][1];
+			int nX = Robot.current.getMap().getRobotX() + neighbourOffsets[i][0];
+			int nY = Robot.current.getMap().getRobotY() + neighbourOffsets[i][1];
 			
 			int mWidth = Robot.current.getMap().getWidth();
 			int mHeight = Robot.current.getMap().getHeight();
@@ -188,12 +229,29 @@ public class Localisation {
 		SampleProvider rightTouch = Robot.current.getRightTouch();
 		
 		pilot.forward();
-		while(leftSample[0] < 0.9 && rightSample[0] < 0.9) {
+		while((leftSample[0] < 0.9 || rightSample[0] < 0.9)) {
 			leftTouch.fetchSample(leftSample, 0);
 	    	rightTouch.fetchSample(rightSample, 0);
 		}
 		pilot.stop();
+		
+		Robot.current.screen.writeTo(new String[]{
+				"H: " + leftSample[0],
+				"0: " + rightSample[0],
+		}, 0, 60, GraphicsLCD.LEFT, Font.getSmallFont());
+		
 		pilot.travel(-4);
+		oriConfidence = 1.0f;
+	}
+	
+	public void alignGridLine() {
+		MovePilot pilot = Robot.current.getPilot();
+		ColorNames cn;
+		pilot.forward();
+		do{
+			cn = Robot.current.getColorSensor().getCurrentColor();
+		}while(cn != ColorNames.BLACK);
+		pilot.travel(-11.0f);
 	}
 	
 	public boolean getEdgePresent() {
@@ -204,5 +262,17 @@ public class Localisation {
 			return false;
 		}
 	}
-
+	
+	public float getOriConfidence() {
+		return oriConfidence;
+	}
+	
+	public void setOriConfidence(float oriConfidence) {
+		this.oriConfidence = oriConfidence;
+	}
+	
+	public float getPosiConfidence() {
+		return posiConfidence;
+	}
+	
 }
