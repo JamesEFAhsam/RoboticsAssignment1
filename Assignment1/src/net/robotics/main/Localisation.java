@@ -33,8 +33,8 @@ public class Localisation {
 	
 	private float oriConfidence; 	//Orientation confidence. 
 	private float posiConfidence;	//Position confidence.
-	
-	
+	public final float _ORITHRESHOLD = 0.7f; //	NEEDS CALIBRATING
+	public final float _POSITHRESHOLD = 0.7f;// NEEDS CALIBRATING
 	
 	public enum dHeadingPosition {
 		Top, Right, Down, Left
@@ -52,7 +52,7 @@ public class Localisation {
 		posiConfidence = 1.0f;
 	}
 	
-	public void localisePosition() {
+	public void localiseRobot() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();
 		boolean[] foundEdges = findEdges();
 		int nFoundEdges = 0;
@@ -164,43 +164,6 @@ public class Localisation {
 			posiConfidence = 1.0f;
 		}
 
-		
-	
-	public void localisePosition1Edge(boolean[] foundEdges) {
-		int initialHeading = Robot.current.getMap().getRobotHeading();
-		boolean xLocaliseCellFound = false;
-		boolean yLocaliseCellFound = false;
-		
-		for(int i=0; i<4; i++) {
-			if (foundEdges[i]) {
-				if(i==1 || i==3) {
-					xLocaliseCellFound = true;
-					Robot.current.turnToHeading(i);
-					alignWithEdge();
-					break;
-				} else {
-					yLocaliseCellFound = true;
-					Robot.current.turnToHeading(i);
-					alignWithEdge();
-					break;
-				}
-			}
-		}
-		// If we've already localised against x, localise for y, vice versa
-		if (xLocaliseCellFound) {
-			// Localise for y using colour. 
-		} else {
-			// Localise for x using colour. 
-		}
-	}
-
-	public void localisePositionNoEdges(boolean[] foundEdges) {
-		int initialHeading = Robot.current.getMap().getRobotHeading();
-		
-		// Localise in current heading using colour
-		
-		// Localise adjacent to current heading using colour
-	}
 	
 	public boolean localiseOrientation() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();	// Save initial heading
@@ -226,7 +189,6 @@ public class Localisation {
 		
 		return false;
 	}
-	
 	
 	
 	// Return edges next to the robot that can be localised against
@@ -313,5 +275,4 @@ public class Localisation {
 		return posiConfidence;
 	}
 	
-
 }
