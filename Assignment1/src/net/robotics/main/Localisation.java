@@ -275,5 +275,4 @@ public class Localisation {
 		return posiConfidence;
 	}
 	
-
 }

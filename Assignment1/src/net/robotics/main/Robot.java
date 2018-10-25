@@ -4,7 +4,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 
 import behaviours.AStar;
-import behaviours.IceSlide;
+import behaviours.IceSlideBehavior;
 import behaviours.LocaliseBehavior;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
@@ -72,7 +72,7 @@ public class Robot {
 	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
 	private LocaliseBehavior b1;
-	private IceSlide b2;
+	private IceSlideBehavior b2;
 	private AStar b3;
 	
 	public static Robot current;
@@ -81,9 +81,7 @@ public class Robot {
 
 	public static void main(String[] args){
 		current = new Robot();
-
 		current.mainLoop();
-
 		current.closeRobot();
 	}
 
@@ -125,7 +123,7 @@ public class Robot {
 	
 	private void setUpBehaviors() {
 		b1 = new LocaliseBehavior(current);
-		b2 = new IceSlide(current);
+		b2 = new IceSlideBehavior(current);
 		b3 = new AStar(current);
 		Behavior[] behaviors = {b3,b2,b1};			// Behavior priority, where [0] is lowest priority
 		arbitrator = new Arbitrator(behaviors, false); // NEED TO ADD BEHAVIORS HERE
@@ -136,6 +134,9 @@ public class Robot {
 
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
+		
+		//arbitrator.go();		// Comment this out to use mainLoop(), or uncomment this 
+								// and comment out mainLoop() to start arbitrator. 
 	}
 
 	public void closeProgram(){
@@ -144,6 +145,8 @@ public class Robot {
 	}
 
 	public void mainLoop(){
+		// TO DO
+		// Need to move this into IceSlide behavior. James? 
 		int squares = 0;
 		
 		ColorNames prevColor = colorSensor.getColor();
@@ -254,7 +257,7 @@ public class Robot {
 		}
 	}
 	
-	private void observe(int heading){
+	public void observe(int heading){
 		/*ultrasonicSensor.clear();
 		try {
 			Thread.sleep(60*5);
@@ -314,7 +317,7 @@ public class Robot {
 		ultrasonicSensor.resetMotor();	
 	}
 
-	private void MoveSquares(int i){
+	public void MoveSquares(int i){
 		int direction = (i/Math.abs(i));
 		
 		for (int j = 0; j < i; j++) {
