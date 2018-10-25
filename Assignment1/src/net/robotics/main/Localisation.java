@@ -33,7 +33,8 @@ public class Localisation {
 	
 	private float oriConfidence; 	//Orientation confidence. 
 	private float posiConfidence;	//Position confidence.
-	
+	public final float _ORITHRESHOLD = 0.7f; //	NEEDS CALIBRATING
+	public final float _POSITHRESHOLD = 0.7f;// NEEDS CALIBRATING
 	
 	public enum dHeadingPosition {
 		Top, Right, Down, Left

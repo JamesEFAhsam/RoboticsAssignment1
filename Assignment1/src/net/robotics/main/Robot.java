@@ -3,6 +3,9 @@ package net.robotics.main;
 import java.util.Dictionary;
 import java.util.HashMap;
 
+import behaviours.AStar;
+import behaviours.IceSlide;
+import behaviours.LocaliseBehavior;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -23,6 +26,8 @@ import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
 import lejos.robotics.navigation.Pose;
+import lejos.robotics.subsumption.Arbitrator;
+import lejos.robotics.subsumption.Behavior;
 import lejos.robotics.SampleProvider;
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
@@ -50,6 +55,7 @@ public class Robot {
 	private OdometryPoseProvider opp;
 	private Map map;
 	private Localisation localisation;
+	private Arbitrator arbitrator;
 	
 	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
 	
@@ -65,6 +71,10 @@ public class Robot {
 	private static float[] leftSample = new float[leftTouch.sampleSize()];
 	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
+	private LocaliseBehavior b1;
+	private IceSlide b2;
+	private AStar b3;
+	
 	public static Robot current;
 	
 
@@ -79,13 +89,9 @@ public class Robot {
 
 	public Robot() {
 		Brick myEV3 = BrickFinder.getDefault();
-
 		led = (EV3LED) myEV3.getLED();
-
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
-
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
-		
 		localisation = new Localisation();
 		
 		NXTRegulatedMotor motor = null;
@@ -105,6 +111,7 @@ public class Robot {
 				motor, 60);
 		
 		setUpRobot();
+		setUpBehaviors();
 
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
@@ -114,6 +121,14 @@ public class Robot {
 		colorSensor.start();
 		
 		ultrasonicSensor.start();
+	}
+	
+	private void setUpBehaviors() {
+		b1 = new LocaliseBehavior(current);
+		b2 = new IceSlide(current);
+		b3 = new AStar(current);
+		Behavior[] behaviors = {b3,b2,b1};			// Behavior priority, where [0] is lowest priority
+		arbitrator = new Arbitrator(behaviors, false); // NEED TO ADD BEHAVIORS HERE
 	}
 
 	private void setUpRobot(){
@@ -153,8 +168,6 @@ public class Robot {
 		screen.clearScreen();
 		screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
-		
-		localisation.localiseOrientation();
 
 		Button.waitForAnyPress();
 
@@ -382,5 +395,9 @@ public class Robot {
 	
 	public ColorSensorMonitor getColorSensor() {
 		return colorSensor;
+	}
+	
+	public Localisation getLocalisation() {
+		return localisation;
 	}
 }
