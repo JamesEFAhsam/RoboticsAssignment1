@@ -18,19 +18,18 @@ public class LocaliseBehavior implements Behavior{
 	}
 	
 	public void action() {
-		
-		Robot.current.screen.clearScreen();
-		Robot.current.screen.writeTo(new String[]{
-				"Localisation"
-		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
-		
 		suppressed = false;
-		Robot.current.getLocalisation().localiseRobot();
+		while (!suppressed) {
+			Robot.current.screen.clearScreen();
+			Robot.current.screen.writeTo(new String[]{
+					"Localisation"
+			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+			Robot.current.getLocalisation().localiseRobot();
+			Thread.yield();
+		}
 	}
 	
 	public boolean takeControl() {
-		
-		
 		float pConf = localisation.getPosiConfidence();
 		float oConf = localisation.getOriConfidence();
 		float pThr = localisation._POSITHRESHOLD;
