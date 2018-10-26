@@ -25,6 +25,9 @@ public class LocaliseBehavior implements Behavior{
 					"Localisation"
 			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 			Robot.current.getLocalisation().localiseRobot();
+			
+			suppressed = true;
+			
 			Thread.yield();
 		}
 	}

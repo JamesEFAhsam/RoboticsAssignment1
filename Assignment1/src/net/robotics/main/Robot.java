@@ -9,6 +9,7 @@ import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -46,9 +47,9 @@ public class Robot {
 	private OdometryPoseProvider opp;
 	private Map map;
 	private Localisation localisation;
-	private Arbitrator arbitrator;
+	private CustomArbitrator arbitrator;
 	
-	public final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
+	public final float _OCCUPIEDBELIEFCUTOFF = 0.65f;
 	
 	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
 	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
@@ -73,7 +74,7 @@ public class Robot {
 	public static void main(String[] args){
 		new Robot();
 		current.startRobot();
-		current.closeRobot();
+		current.closeProgram();
 	}
 
 	public Robot() {
@@ -82,6 +83,12 @@ public class Robot {
 		Brick myEV3 = BrickFinder.getDefault();
 		led = (EV3LED) myEV3.getLED();
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
+		
+		screen.clearScreen();
+		screen.writeTo(new String[]{
+				"Booting..."
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+		
 		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
 		localisation = new Localisation();
 		
@@ -112,31 +119,29 @@ public class Robot {
 	}
 	
 	private void startRobot() {
+		pilot = ChasConfig.getPilot();
+		pilot.setLinearSpeed(10);
+		
+		// Create a pose provider and link it to the move pilot
+		opp = new OdometryPoseProvider(pilot);
+		
 		setUpBehaviors();
-		setUpRobot();
+		
+		arbitrator.go();
 	}
 	
 	private void setUpBehaviors() {
 		b1 = new LocaliseBehavior();
 		b2 = new IceSlideBehavior();
 		b3 = new AStar(current);
-		Behavior[] behaviors = {b3,b2,b1};			// Behavior priority, where [0] is lowest priority
-		arbitrator = new Arbitrator(behaviors, true); // NEED TO ADD BEHAVIORS
+		Behavior[] behaviors = {b3, b2, b1};			// Behavior priority, where [0] is lowest priority
+		arbitrator = new CustomArbitrator(behaviors, false); // NEED TO ADD BEHAVIORS
+		//LCD.drawString("Begone", 0, 0);
+		//LCD.drawString("Begone", 0, 1);
+		LCD.clearDisplay();
 	}
-
-	private void setUpRobot(){
-		pilot = ChasConfig.getPilot();
-
-		// Create a pose provider and link it to the move pilot
-		opp = new OdometryPoseProvider(pilot);
-		
-		arbitrator.go();		// Comment this out to use mainLoop(), or uncomment this 
-								// and comment out mainLoop() to start arbitrator. 
-		
-	}
-
+	
 	public void closeProgram(){
-		closeRobot();
 		System.exit(0);
 	}
 
@@ -302,31 +307,41 @@ public class Robot {
 		}
 		float R = ultrasonicSensor.getDistance();
 		
-		screen.writeTo(new String[]{
+		/*screen.writeTo(new String[]{
 				"F: " + F,
 				"L: " + L,
 				"R: " + R,
 				"H: " + heading
-		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
 		
 		map.updateMap(heading, F, L, R);
 		ultrasonicSensor.resetMotor();	
 	}
 
-	public void MoveSquares(int i){
+	public boolean MoveSquares(int i){
 		int direction = (i/Math.abs(i));
+		
 		
 		for (int j = 0; j < i; j++) {
 			if(direction == 1)
 				pilot.forward();
 			else
 				pilot.backward();
+			
+			
+			
 			ColorNames cn;
 			do{
 				cn = colorSensor.getCurrentColor();
+				if(bothBumpersPressed()){
+					pilot.travel(-4.0f);
+					return false;
+				}
 			}while(cn != ColorNames.BLACK);
 			pilot.travel(11.0f);
+			localisation.decreasePosiConfidence();
 		}
+		return true;
 	}
 	
 	public void turnToHeading(int desiredHeading) {
@@ -337,14 +352,18 @@ public class Robot {
 			case 1: 
 			case -3:
 				rotationAmount = 90;
+				localisation.decreaseOriConfidence();
 				break;
 			case 2: 
 			case -2:
 				rotationAmount = 180;
+				localisation.decreaseOriConfidence();
+				localisation.decreaseOriConfidence();
 				break;
 			case -1:
 			case 3:
 				rotationAmount = -90;
+				localisation.decreaseOriConfidence();
 				break;
 		}
 		pilot.rotate(rotationAmount);
@@ -356,12 +375,23 @@ public class Robot {
 		
 		map.setRobotPos(map.getRobotX(), map.getRobotY(), desiredHeading);
 	}
+	
+	public boolean bothBumpersPressed(){
+		SampleProvider leftTouch = Robot.current.getLeftTouch();
+		SampleProvider rightTouch = Robot.current.getRightTouch();
+		
+
+		float[] leftSample = Robot.current.getLeftSample();
+		float[] rightSample = Robot.current.getRightSample();
+		
+		leftTouch.fetchSample(leftSample, 0);
+    	rightTouch.fetchSample(rightSample, 0);
+		
+		return ((leftSample[0] > 0.9 && rightSample[0] > 0.9));
+	}
 
 	public LCDRenderer getScreen(){
 		return screen;
-	}
-
-	public void closeRobot(){
 	}
 	
 	public OdometryPoseProvider getOpp() {

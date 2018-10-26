@@ -38,8 +38,8 @@ public class Tile {
 	public float getOccupiedBelief(){
 		if(visited == 0 && this.viewed != 0f){
 			if(this.viewed == 0)
-				return 0;
-			this.occupiedBelief = (this.viewed-this.empty)/this.viewed;
+				return this.occupiedBelief;
+			this.occupiedBelief = (float)(this.viewed-this.empty)/(float)this.viewed;
 		}
 		return this.occupiedBelief;
 	}

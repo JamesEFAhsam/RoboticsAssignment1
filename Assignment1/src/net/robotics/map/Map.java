@@ -1,5 +1,7 @@
 package net.robotics.map;
 
+import net.robotics.main.Robot;
+
 public class Map {
 	private Tile[][] tiles;
 	private int width, height;
@@ -166,7 +168,7 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= 0.95f)
+		if(tiles[x][y].getOccupiedBelief() >= Robot.current._OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
@@ -185,7 +187,7 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= 0.95f)
+		if(tiles[x][y].getOccupiedBelief() >= Robot.current._OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
