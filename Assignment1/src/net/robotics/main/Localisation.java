@@ -222,7 +222,7 @@ public class Localisation {
 			}else {
 				Tile tile = Robot.current.getMap().getTile(nX,nY);
 				// If tile is likely occupied, return true, else return False	
-				if (tile.getOccupiedBelief() > Robot.current._OCCUPIEDBELIEFCUTOFF) {
+				if (tile.getOccupiedBelief() > Map._OCCUPIEDBELIEFCUTOFF) {
 					foundEdges[i] = true;
 				} else {
 					foundEdges[i] = false;

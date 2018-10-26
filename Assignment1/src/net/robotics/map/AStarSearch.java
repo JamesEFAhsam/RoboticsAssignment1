@@ -74,7 +74,7 @@ public class AStarSearch {
 			Node next = getLeastFScore(openSet);
 			openSet.remove(next);
 			
-			//System.out.print("Chosen " + next.t.getX() + "/" + next.t.getY());
+			////System.out.print("Chosen " + next.t.getX() + "/" + next.t.getY());
 			
 			for (int x = -1; x < 2; x++) {
 				for (int y = -1; y < 2; y++) {
@@ -84,10 +84,10 @@ public class AStarSearch {
 					int nX = (next.t.getX()+x);
 					int nY = (next.t.getY()+y);
 					
-					//System.out.print("\n looking at " + x + "/" + y + ", " + nX + "/" + nY + ", " + arena.getWidth() + "/" + arena.getHeight());
+					////System.out.print("\n looking at " + x + "/" + y + ", " + nX + "/" + nY + ", " + arena.getWidth() + "/" + arena.getHeight());
 					
 					if(nX<0 || nX>=arena.getWidth() || nY<0 || nY>=arena.getHeight()){
-						//System.out.print(", continued");
+						////System.out.print(", continued");
 						continue;
 					}
 					
@@ -99,7 +99,7 @@ public class AStarSearch {
 					neighbor.parent = next;
 					
 					if(areNodesEqual(neighbor, new Node(goal))){
-						//System.out.print(", chosen\n");
+						////System.out.print(", chosen\n");
 						return reconstructPath(neighbor);
 					}
 					
@@ -111,7 +111,7 @@ public class AStarSearch {
 					if(isInSet(openSet, neighbor)){
 						Node inSet = getInSet(openSet, neighbor);
 						if(inSet.getF() < neighbor.getF()){
-							//System.out.print(", in open set; f: " + neighbor.getF());
+							////System.out.print(", in open set; f: " + neighbor.getF());
 							continue;
 						} else {
 							openSet.remove(inSet);
@@ -121,21 +121,21 @@ public class AStarSearch {
 					if(isInSet(closedSet, neighbor)){
 						Node inSet = getInSet(closedSet, neighbor);
 						if(inSet.getF() < neighbor.getF()){
-							//System.out.print(", in closed set; f: " + neighbor.getF());
+							////System.out.print(", in closed set; f: " + neighbor.getF());
 							continue;
 						}else {
 							closedSet.remove(inSet);
 						}
 					}
 					
-					//System.out.print(", chosen");
+					////System.out.print(", chosen");
 					
 					openSet.add(neighbor);
 				}
 			}
 			
 			closedSet.add(next);
-			//System.out.print(".\n");
+			////System.out.print(".\n");
 		}
 		
 		return null;
@@ -187,7 +187,69 @@ public class AStarSearch {
 		
 	}
 	
-	
+	public Tile getLeastVisitedNode(){
+		ArrayList<Node> openSet = new ArrayList<Node>();
+		ArrayList<Node> closedSet = new ArrayList<Node>();
+		
+		Tile leastKnownAbout = arena.getTile(arena.getRobotX(), arena.getRobotY());
+		
+		Node startNode = new Node(leastKnownAbout);
+		startNode.setG(0);
+		openSet.add(startNode);
+		
+		while(!openSet.isEmpty()){
+			Node next = openSet.get(0);
+			openSet.remove(next);
+			
+			if(next.t.getViewed() < leastKnownAbout.getViewed())
+				leastKnownAbout = next.t;
+			
+			if(next.t.getX() != arena.getRobotX() && next.t.getY() != arena.getRobotY() 
+					&& leastKnownAbout.getX() == arena.getRobotX() && leastKnownAbout.getY() == arena.getRobotY())
+				leastKnownAbout = next.t;
+			
+			//System.out.print(openSet.size() + ": Chosen " + next.t.getX() + "/" + next.t.getY());
+			
+			for (int x = -1; x < 2; x++) {
+				for (int y = -1; y < 2; y++) {
+					if((x != 0 && y != 0) || (x == y && x == 0))
+						continue;
+					
+					int nX = (next.t.getX()+x);
+					int nY = (next.t.getY()+y);
+					
+					//System.out.print("\n looking at " + x + "/" + y + ", " + nX + "/" + nY + ", " + arena.getWidth() + "/" + arena.getHeight());
+					
+					if(nX<0 || nX>=arena.getWidth() || nY<0 || nY>=arena.getHeight()){
+						//System.out.print(", continued");
+						continue;
+					}
+					
+					if(!arena.canMove(nX, nY))
+						continue;
+					
+					Node neighbor = new Node(arena.getTile(nX, nY));
+					
+					if(isInSet(openSet, neighbor)){
+						//System.out.print(", in open set");
+						continue;
+					} else if(isInSet(closedSet, neighbor)){
+						//System.out.print(", in closed set");
+						continue;
+					}
+						
+					openSet.add(neighbor);
+					
+				}
+			}
+			
+			closedSet.add(next);
+			
+			//System.out.println(".");
+		}
+		
+		return leastKnownAbout;
+	}
 	
 	private int calculateManhatten(int sX, int sY, int eX, int eY) {
 		return Math.abs(sX - eX) + 

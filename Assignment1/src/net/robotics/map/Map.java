@@ -8,6 +8,8 @@ public class Map {
 	private int robotX, robotY;
 	private int robotHeading;
 	
+	public static final float _OCCUPIEDBELIEFCUTOFF = 0.65f;
+	
 	public Map(int width, int height){
 		this.setWidth(width);
 		this.setHeight(height);
@@ -168,7 +170,7 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= Robot.current._OCCUPIEDBELIEFCUTOFF)
+		if(tiles[x][y].getOccupiedBelief() >= _OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
@@ -187,10 +189,22 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= Robot.current._OCCUPIEDBELIEFCUTOFF)
+		if(tiles[x][y].getOccupiedBelief() >= _OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
+	}
+	
+	public int getHeading(int dx, int dy){
+		if(dy > 0)
+			return 0;
+		if(dx > 0)
+			return 1;
+		if(dy < 0)
+			return 2;
+		if(dx < 0)
+			return 3;
+		return 0;
 	}
 	
 	public boolean beenVisited(int heading){

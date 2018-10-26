@@ -1,8 +1,5 @@
 package net.robotics.main;
 
-import behaviours.AStar;
-import behaviours.IceSlideBehavior;
-import behaviours.LocaliseBehavior;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -22,6 +19,9 @@ import lejos.robotics.navigation.MovePilot;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import lejos.robotics.SampleProvider;
+import net.robotics.behaviours.AStar;
+import net.robotics.behaviours.IceSlideBehavior;
+import net.robotics.behaviours.LocaliseBehavior;
 import net.robotics.map.Map;
 import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
@@ -49,7 +49,7 @@ public class Robot {
 	private Localisation localisation;
 	private CustomArbitrator arbitrator;
 	
-	public final float _OCCUPIEDBELIEFCUTOFF = 0.65f;
+	public int overrideVisitAmount = 0;
 	
 	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
 	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
@@ -133,7 +133,7 @@ public class Robot {
 	private void setUpBehaviors() {
 		b1 = new LocaliseBehavior();
 		b2 = new IceSlideBehavior();
-		b3 = new AStar(current);
+		b3 = new AStar(getMap());
 		Behavior[] behaviors = {b3, b2, b1};			// Behavior priority, where [0] is lowest priority
 		arbitrator = new CustomArbitrator(behaviors, false); // NEED TO ADD BEHAVIORS
 		//LCD.drawString("Begone", 0, 0);
