@@ -21,7 +21,7 @@ public class AStarTest {
 		
 		AStarSearch search = new AStarSearch(map);
 		
-		LinkedList<Tile> tiles = search.searchForPath(map.getTile(map.getRobotX(), map.getRobotY()), map.getTile(4, 4));
+		LinkedList<Tile> tiles = search.searchForPath(map.getTile(map.getRobotX(), map.getRobotY()), map.getTile(2, 2));
 		
 		while (!tiles.isEmpty()) {
 			Tile tile = (Tile) tiles.pop();
