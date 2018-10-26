@@ -1,8 +1,5 @@
 package net.robotics.main;
 
-import java.util.Dictionary;
-import java.util.HashMap;
-
 import behaviours.AStar;
 import behaviours.IceSlideBehavior;
 import behaviours.LocaliseBehavior;
@@ -12,7 +9,6 @@ import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
-import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.motor.NXTRegulatedMotor;
 import lejos.hardware.port.Port;
@@ -20,17 +16,12 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.internal.ev3.EV3LED;
-import lejos.robotics.chassis.Chassis;
-import lejos.robotics.chassis.Wheel;
-import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
-import lejos.robotics.navigation.Pose;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import lejos.robotics.SampleProvider;
 import net.robotics.map.Map;
-import net.robotics.map.Tile;
 import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
@@ -80,12 +71,14 @@ public class Robot {
 
 
 	public static void main(String[] args){
-		current = new Robot();
-		current.mainLoop();
+		new Robot();
+		current.startRobot();
 		current.closeRobot();
 	}
 
 	public Robot() {
+		current = this;
+		
 		Brick myEV3 = BrickFinder.getDefault();
 		led = (EV3LED) myEV3.getLED();
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
@@ -107,9 +100,6 @@ public class Robot {
 		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
 				ultra, 
 				motor, 60);
-		
-		setUpRobot();
-		setUpBehaviors();
 
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
@@ -121,12 +111,17 @@ public class Robot {
 		ultrasonicSensor.start();
 	}
 	
+	private void startRobot() {
+		setUpBehaviors();
+		setUpRobot();
+	}
+	
 	private void setUpBehaviors() {
-		b1 = new LocaliseBehavior(current);
-		b2 = new IceSlideBehavior(current);
+		b1 = new LocaliseBehavior();
+		b2 = new IceSlideBehavior();
 		b3 = new AStar(current);
 		Behavior[] behaviors = {b3,b2,b1};			// Behavior priority, where [0] is lowest priority
-		arbitrator = new Arbitrator(behaviors, false); // NEED TO ADD BEHAVIORS HERE
+		arbitrator = new Arbitrator(behaviors, true); // NEED TO ADD BEHAVIORS
 	}
 
 	private void setUpRobot(){
@@ -135,8 +130,9 @@ public class Robot {
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
 		
-		//arbitrator.go();		// Comment this out to use mainLoop(), or uncomment this 
+		arbitrator.go();		// Comment this out to use mainLoop(), or uncomment this 
 								// and comment out mainLoop() to start arbitrator. 
+		
 	}
 
 	public void closeProgram(){
