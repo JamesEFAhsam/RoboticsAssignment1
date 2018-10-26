@@ -19,6 +19,6 @@ public class AStar implements Behavior {
 	}
 	
 	public boolean takeControl() {
-		return true;
+		return false;
 	}
 }
