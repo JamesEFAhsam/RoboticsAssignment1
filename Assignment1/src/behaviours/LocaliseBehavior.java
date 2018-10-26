@@ -1,16 +1,16 @@
 package behaviours;
+import lejos.hardware.lcd.Font;
+import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.subsumption.Behavior;
 import net.robotics.main.Localisation;
 import net.robotics.main.Robot;
 
 public class LocaliseBehavior implements Behavior{
 	public boolean suppressed;
-	private Robot robot;
 	private Localisation localisation;
 	
-	public LocaliseBehavior (Robot robot) {
-		this.robot = robot;
-		this.localisation = robot.getLocalisation();
+	public LocaliseBehavior () {
+		this.localisation = Robot.current.getLocalisation();
 	}
 	
 	public void suppress() {
@@ -19,7 +19,14 @@ public class LocaliseBehavior implements Behavior{
 	
 	public void action() {
 		suppressed = false;
-		robot.getLocalisation().localiseRobot();
+		while (!suppressed) {
+			Robot.current.screen.clearScreen();
+			Robot.current.screen.writeTo(new String[]{
+					"Localisation"
+			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
+			Robot.current.getLocalisation().localiseRobot();
+			Thread.yield();
+		}
 	}
 	
 	public boolean takeControl() {
