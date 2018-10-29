@@ -33,8 +33,10 @@ public class Localisation {
 	
 	private float oriConfidence; 	//Orientation confidence. 
 	private float posiConfidence;	//Position confidence.
-	public final float _ORITHRESHOLD = 0.7f; //	NEEDS CALIBRATING
+	public final float _ORITHRESHOLD = 0.8f; //	NEEDS CALIBRATING
 	public final float _POSITHRESHOLD = 0.7f;// NEEDS CALIBRATING
+	
+	private final float _CONFIDENCEDEC = 0.05f;
 	
 	public enum dHeadingPosition {
 		Top, Right, Down, Left
@@ -90,6 +92,9 @@ public class Localisation {
 		// Localises X position, Y position, and orientation
 		// Localises using 2 edges
 		public void localise2Edges(boolean[] foundEdges) {
+			Robot.current.screen.writeTo(new String[]{
+					"Two+ Edges"
+			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			int xLocaliseCell;
 			int yLocaliseCell;
@@ -117,6 +122,9 @@ public class Localisation {
 		// Localises X position, Y position, and orientation
 		// Localises using 1 edge, and 1 space
 		public void localise1Edge(boolean[] foundEdges) {
+			Robot.current.screen.writeTo(new String[]{
+					"One Edge and One Space"
+			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			int xLocaliseCell;
 			int yLocaliseCell;
@@ -153,6 +161,9 @@ public class Localisation {
 		// Localises X position and Y position
 		// Localises using 2 spaces
 		public void localise0Edge(boolean[] foundEdges) {
+			Robot.current.screen.writeTo(new String[]{
+					"2 Spaces"
+			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			
 			Robot.current.turnToHeading(0);					// Turn to yLocalise cell and 
@@ -165,7 +176,7 @@ public class Localisation {
 		}
 
 	
-	public boolean localiseOrientation() {
+	/*public boolean localiseOrientation() {
 		int initialHeading = Robot.current.getMap().getRobotHeading();	// Save initial heading
 		boolean[] foundEdges = findEdges();						// Look for edges
 		
@@ -188,7 +199,7 @@ public class Localisation {
 		}
 		
 		return false;
-	}
+	}*/
 	
 	
 	// Return edges next to the robot that can be localised against
@@ -211,7 +222,7 @@ public class Localisation {
 			}else {
 				Tile tile = Robot.current.getMap().getTile(nX,nY);
 				// If tile is likely occupied, return true, else return False	
-				if (tile.getOccupiedBelief() > Robot.current._OCCUPIEDBELIEFCUTOFF) {
+				if (tile.getOccupiedBelief() > Map._OCCUPIEDBELIEFCUTOFF) {
 					foundEdges[i] = true;
 				} else {
 					foundEdges[i] = false;
@@ -223,23 +234,16 @@ public class Localisation {
 	
 	public void alignWithEdge() {
 		MovePilot pilot = Robot.current.getPilot();
-		float[] leftSample = Robot.current.getLeftSample();
-		float[] rightSample = Robot.current.getRightSample();
-		SampleProvider leftTouch = Robot.current.getLeftTouch();
-		SampleProvider rightTouch = Robot.current.getRightTouch();
 		
 		pilot.forward();
-		while((leftSample[0] < 0.9 || rightSample[0] < 0.9)) {
-			leftTouch.fetchSample(leftSample, 0);
-	    	rightTouch.fetchSample(rightSample, 0);
+		while(!Robot.current.bothBumpersPressed()) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		pilot.stop();
-		
-		Robot.current.screen.writeTo(new String[]{
-				"H: " + leftSample[0],
-				"0: " + rightSample[0],
-		}, 0, 60, GraphicsLCD.LEFT, Font.getSmallFont());
-		
 		pilot.travel(-4);
 		oriConfidence = 1.0f;
 	}
@@ -251,7 +255,7 @@ public class Localisation {
 		do{
 			cn = Robot.current.getColorSensor().getCurrentColor();
 		}while(cn != ColorNames.BLACK);
-		pilot.travel(-11.0f);
+		pilot.travel(-13.0f);
 	}
 	
 	public boolean getEdgePresent() {
@@ -275,4 +279,15 @@ public class Localisation {
 		return posiConfidence;
 	}
 	
+	public void setPosiConfidence(float posiConfidence) {
+		this.posiConfidence = posiConfidence;
+	}
+	
+	public void decreaseOriConfidence(){
+		setOriConfidence(getOriConfidence() - _CONFIDENCEDEC);
+	}
+	
+	public void decreasePosiConfidence(){
+		setPosiConfidence(getPosiConfidence() - _CONFIDENCEDEC);
+	}
 }

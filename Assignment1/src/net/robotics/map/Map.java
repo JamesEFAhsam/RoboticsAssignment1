@@ -1,10 +1,14 @@
 package net.robotics.map;
 
+import net.robotics.main.Robot;
+
 public class Map {
 	private Tile[][] tiles;
 	private int width, height;
 	private int robotX, robotY;
 	private int robotHeading;
+	
+	public static final float _OCCUPIEDBELIEFCUTOFF = 0.65f;
 	
 	public Map(int width, int height){
 		this.setWidth(width);
@@ -166,7 +170,7 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= 0.95f)
+		if(tiles[x][y].getOccupiedBelief() >= _OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
@@ -185,10 +189,22 @@ public class Map {
 		if(y < 0 || y >= height)
 			return false;
 		
-		if(tiles[x][y].getOccupiedBelief() >= 0.95f)
+		if(tiles[x][y].getOccupiedBelief() >= _OCCUPIEDBELIEFCUTOFF)
 			return false;
 		
 		return true;
+	}
+	
+	public int getHeading(int dx, int dy){
+		if(dy > 0)
+			return 0;
+		if(dx > 0)
+			return 1;
+		if(dy < 0)
+			return 2;
+		if(dx < 0)
+			return 3;
+		return 0;
 	}
 	
 	public boolean beenVisited(int heading){

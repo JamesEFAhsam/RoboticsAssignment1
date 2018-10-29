@@ -1,5 +1,7 @@
 package net.robotics.screen;
 
+import java.text.Format;
+
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import net.robotics.main.Robot;
@@ -208,23 +210,23 @@ public class LCDRenderer{
 				"Y: " + map.getRobotY(),
 		}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
 		
-		for (int g = 0; g < map.getWidth(); g++) {
-			for (int u = 0; u < map.getHeight(); u++) {
-				Tile tile = map.getTile(g,u);
+		for (int tileX = 0; tileX < map.getWidth(); tileX++) {
+			for (int tileY = 0; tileY < map.getHeight(); tileY++) {
+				Tile tile = map.getTile(tileX,tileY);
 				float ob = tile.getOccupiedBelief();
 				if(ob <= 0.5f)
 					lcd.setStrokeStyle(lcd.DOTTED);
 				else
 					lcd.setStrokeStyle(lcd.SOLID);
 				
-				if(ob >= Robot.current._OCCUPIEDBELIEFCUTOFF) {
+				if(!map.canMove(tileX, tileY)) {
 					lcd.fillRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
 				} else {
 					lcd.drawRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
 				}
 
 				
-				if(g == map.getRobotX() && u == map.getRobotY()){
+				if(tileX == map.getRobotX() && tileY == map.getRobotY()){
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getDefaultFont());
 					lcd.drawChar('R', x+(tile.getX()*16) , y+(map.getHeight()*16)-(tile.getY()*16) , GraphicsLCD.VCENTER);
@@ -232,7 +234,8 @@ public class LCDRenderer{
 				} else {
 					Font f = lcd.getFont();
 					lcd.setFont(Font.getSmallFont());
-					lcd.drawString(tile.getEmpty() + "" + tile.getViewed(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
+					lcd.drawString(Math.round(tile.getOccupiedBelief()*100f)+"", x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, !map.canMove(tileX, tileY));
+					//lcd.drawString(tile.getEmpty() + "" + tile.getViewed(), x+(tile.getX()*16) + 2, y+(map.getHeight()*16)-(tile.getY()*16)+ 4, GraphicsLCD.VCENTER, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
 					lcd.setFont(f);
 				}
 			}
