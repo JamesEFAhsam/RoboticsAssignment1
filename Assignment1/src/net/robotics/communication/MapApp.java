@@ -72,21 +72,21 @@ class GPanel extends JPanel {
 					float ob = tile.getOccupiedBelief();
 					 
 					if(ob >= Robot.current._OCCUPIEDBELIEFCUTOFF) {
-						g.fillRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
+						g.fillRect(x+(tile.getX()*100), y+(map.getHeight()*100)-(tile.getY()*100), 100, 100);
 					} else {
-						g.drawRect(x+(tile.getX()*16), y+(map.getHeight()*16)-(tile.getY()*16), 16, 16);
+						g.drawRect(x+(tile.getX()*100), y+(map.getHeight()*100)-(tile.getY()*100), 100, 100);
 					}
 					
 					if(i == map.getRobotX() && j == map.getRobotY()){
 						//Font f = graph.getFont();
 						//graph.setFont(Font.getDefaultFont());
-						g.drawString("R", x+(tile.getX()*16) , x+(map.getHeight()*16)-(tile.getY()*16));
+						g.drawString("R", x+(tile.getX()*100) , x+(map.getHeight()*100)-(tile.getY()*100));
 						//graph.setFont(f);
 					} else {
 						Font f = g.getFont();
 						//graph.setFont(Font.getSmallFont());
 						
-						g.drawString(tile.getEmpty() + "" + tile.getVisitAmount(), getX()+(tile.getX()*16) + 2, getY()+(map.getHeight()*16)-(tile.getY()*16)+ 4, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
+						g.drawString(tile.getEmpty() + "" + tile.getVisitAmount(), getX()+(tile.getX()*100) + 20, getY()+(map.getHeight()*100)-(tile.getY()*100)+ 40, ob >= Robot.current._OCCUPIEDBELIEFCUTOFF);
 						g.setFont(f);
 					}
 			}
