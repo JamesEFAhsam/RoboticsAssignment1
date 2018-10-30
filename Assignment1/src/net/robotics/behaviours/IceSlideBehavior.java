@@ -1,4 +1,4 @@
-package behaviours;
+package net.robotics.behaviours;
 
 import lejos.hardware.Button;
 import lejos.hardware.lcd.Font;
@@ -39,12 +39,11 @@ public class IceSlideBehavior implements Behavior{
 		
 
 		while(!suppressed){
-			/*Robot.current.screen.clearScreen();
+			Robot.current.screen.clearScreen();
 			Robot.current.screen.writeTo(new String[]{
 					"Ice Slide: " + iteration,
-					"ORI: " + Robot.current.getLocalisation().getOriConfidence(),
-					"POSI: " + Robot.current.getLocalisation().getPosiConfidence(),
-			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());*/
+					"Amount: " + Robot.current.overrideVisitAmount
+			}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 
 			
 
@@ -52,7 +51,6 @@ public class IceSlideBehavior implements Behavior{
 				Robot.current.closeProgram();
 			
 			Robot.current.observe(map.getRobotHeading());
-			screen.clearScreen();
 			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
 			if((!map.beenVisited(map.getRobotHeading()) || visitOverride) && map.canMove(map.getRobotHeading())){
@@ -67,6 +65,10 @@ public class IceSlideBehavior implements Behavior{
 	
 					Robot.current.observe(map.getRobotHeading());
 					screen.clearScreen();
+					Robot.current.screen.writeTo(new String[]{
+							"Ice Slide: " + iteration,
+							"Amount: " + Robot.current.overrideVisitAmount
+					}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 					screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 	
 					visitOverride = false;
@@ -79,13 +81,22 @@ public class IceSlideBehavior implements Behavior{
 				Robot.current.turnToHeading(map.getRobotHeading()+1);
 				Robot.current.observe(map.getRobotHeading());
 				screen.clearScreen();
+				Robot.current.screen.writeTo(new String[]{
+						"Ice Slide: " + iteration,
+						"Amount: " + Robot.current.overrideVisitAmount
+				}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
 
 				amount++;
 				if(amount >= 4){
 					amount = 0;
 					visitOverride = true;
+					Robot.current.overrideVisitAmount++;
 				}
+			}
+			
+			if(Robot.current.overrideVisitAmount > 0){
+				suppress();
 			}
 			
 			if(Button.ESCAPE.isDown())
@@ -98,6 +109,10 @@ public class IceSlideBehavior implements Behavior{
 	}
 
 	public boolean takeControl() {
+		if(Robot.current.overrideVisitAmount > 0){
+			visitOverride = false;
+			return false;
+		}
 		return true;
 	}
 }

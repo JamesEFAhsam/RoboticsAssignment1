@@ -1,4 +1,4 @@
-package behaviours;
+package net.robotics.behaviours;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.subsumption.Behavior;
@@ -26,7 +26,7 @@ public class LocaliseBehavior implements Behavior{
 			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 			Robot.current.getLocalisation().localiseRobot();
 			
-			suppressed = true;
+			suppress();
 			
 			Thread.yield();
 		}
