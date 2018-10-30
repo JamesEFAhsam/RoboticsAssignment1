@@ -389,6 +389,15 @@ public class Robot {
 		
 		return ((leftSample[0] > 0.9 && rightSample[0] > 0.9));
 	}
+	
+	public boolean passedLine() {
+		ColorNames cn = Robot.current.getColorSensor().getCurrentColor();
+		if (cn == ColorNames.BLACK) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	public LCDRenderer getScreen(){
 		return screen;
