@@ -34,6 +34,7 @@ public class IceSlideBehavior implements Behavior{
 	}
 
 	public void action() {
+		Robot.current.getLED().setPattern(3);
 		suppressed = false;
 
 		

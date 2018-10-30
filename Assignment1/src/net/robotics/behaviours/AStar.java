@@ -31,6 +31,7 @@ public class AStar implements Behavior {
 	}
 
 	public void action() {
+		Robot.current.getLED().setPattern(1);
 		Robot.current.screen.clearScreen();
 		Robot.current.screen.writeTo(new String[]{
 				"Running: "

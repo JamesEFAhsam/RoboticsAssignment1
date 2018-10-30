@@ -3,6 +3,7 @@ package net.robotics.main;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
+import lejos.hardware.LED;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
@@ -13,7 +14,6 @@ import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.internal.ev3.EV3LED;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MovePilot;
 import lejos.robotics.subsumption.Arbitrator;
@@ -42,7 +42,7 @@ public class Robot {
 	public LCDRenderer screen;
 	private ColorSensorMonitor colorSensor;
 	private UltrasonicSensorMonitor ultrasonicSensor;
-	private EV3LED led;
+	private LED led;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
@@ -81,7 +81,7 @@ public class Robot {
 		current = this;
 		
 		Brick myEV3 = BrickFinder.getDefault();
-		led = (EV3LED) myEV3.getLED();
+		led = myEV3.getLED();
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 		
 		screen.clearScreen();
@@ -437,5 +437,9 @@ public class Robot {
 	
 	public Localisation getLocalisation() {
 		return localisation;
+	}
+	
+	public LED getLED() {
+		return led;
 	}
 }
