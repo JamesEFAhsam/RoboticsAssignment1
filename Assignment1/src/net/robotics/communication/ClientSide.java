@@ -37,9 +37,10 @@ public class ClientSide  {
 		InputStream in = sock.getInputStream();
 		DataInputStream dIn = new DataInputStream(in);
 		String str = dIn.readUTF();
-		//Gson gson = new Gson();
-		//str = gson.fromJson(json, Map.class);
-		System.out.println(str);
+		Gson gson = new Gson();
+		Map loadedMap = gson.fromJson(str, Map.class);
+		System.out.println(loadedMap.canMove(1, 3));
+		System.out.println(loadedMap.canMove(1, 4));
 		sock.close();
 		
 		
@@ -50,7 +51,7 @@ public class ClientSide  {
 	 
 	 
 	 public void DrawMap(int x, int y,  Map map) {
-			for (int i = 0; i < map.getWidth(); i++) {
+			/*for (int i = 0; i < map.getWidth(); i++) {
 				for (int j = 0; j < map.getHeight(); i++) {
 					Tile tile = map.getTile(i,j);
 					float ob = tile.getOccupiedBelief();
@@ -74,7 +75,7 @@ public class ClientSide  {
 						graph.setFont(f);
 					}
 				}
-			}
+			}*/
 		}
 
 	

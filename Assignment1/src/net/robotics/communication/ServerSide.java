@@ -20,7 +20,7 @@ import net.robotics.screen.*;
 public class ServerSide {
 	
 	public static final int port = 4645;
-	Map mapel = new Map(6,7); 
+	public static Map mapel = new Map(6,7); 
 	LCDRenderer screen;
 	Graphics2D graph;
 	
@@ -34,7 +34,12 @@ public class ServerSide {
 		OutputStream out = client.getOutputStream();
 		DataOutputStream dOut = new DataOutputStream(out);
 		Gson gson = new Gson();
-		dOut.writeUTF(gson.toJson(Robot.current.getMap()));
+		
+		mapel.getTile(1, 3).view(false);
+		
+		dOut.writeUTF(gson.toJson(mapel));
+		
+		
 		
 		dOut.flush();
 		server.close();
