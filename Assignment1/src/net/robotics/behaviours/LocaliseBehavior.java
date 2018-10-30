@@ -18,6 +18,7 @@ public class LocaliseBehavior implements Behavior{
 	}
 	
 	public void action() {
+		Robot.current.getLED().setPattern(2);
 		suppressed = false;
 		while (!suppressed) {
 			Robot.current.screen.clearScreen();

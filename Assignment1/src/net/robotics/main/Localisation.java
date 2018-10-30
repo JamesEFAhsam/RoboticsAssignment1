@@ -108,9 +108,9 @@ public class Localisation {
 			} else xLocaliseCell = 3;
 			
 			Robot.current.turnToHeading(yLocaliseCell);		// Turn to y cell
-			alignWithEdge();								// y position now localised
+			alignWithEdge(yLocaliseCell);								// y position now localised
 			Robot.current.turnToHeading(xLocaliseCell);		// turn to x cell
-			alignWithEdge();								// x position now localised
+			alignWithEdge(xLocaliseCell);								// x position now localised
 			Robot.current.turnToHeading(initialHeading);	// return to initial pose
 			
 			posiConfidence = 1.0f;			// 100% confidence of position
@@ -135,18 +135,18 @@ public class Localisation {
 						 yLocaliseCell = i;								// Set yLocalise cell to it
 						 xLocaliseCell = 1;								// Set xLocalise as left or right (both empty)
 						 Robot.current.turnToHeading(yLocaliseCell);	// Turn to yLocalise cell and 
-						 alignWithEdge();								// Align to edge and localise y position
+						 alignWithEdge(yLocaliseCell);								// Align to edge and localise y position
 						 Robot.current.turnToHeading(xLocaliseCell);	// Turn to xLocalise cell and
-						 alignGridLine();								// Align to grid line and localise x position
+						 alignGridLine(xLocaliseCell);								// Align to grid line and localise x position
 						 Robot.current.turnToHeading(initialHeading);
 						 break;
 					 } else {											// Otherwise edge is left or right
 						 xLocaliseCell = i;								// Set xLocalise cell to it
 						 yLocaliseCell = 0;								// Set yLocalise as top or bottom (both empty)
 						 Robot.current.turnToHeading(xLocaliseCell);	// turn to xLocalise cell and
-						 alignWithEdge();								// Align to edge and localise x position
+						 alignWithEdge(xLocaliseCell);								// Align to edge and localise x position
 						 Robot.current.turnToHeading(yLocaliseCell);	// Turn to yLocalise cell
-						 alignGridLine();								// Align to grid line and localise y position
+						 alignGridLine(yLocaliseCell);								// Align to grid line and localise y position
 						 Robot.current.turnToHeading(initialHeading);
 						 break;
 					 }
@@ -167,9 +167,9 @@ public class Localisation {
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			
 			Robot.current.turnToHeading(0);					// Turn to yLocalise cell and 
-			alignGridLine();								// Align to grid and localise y position
+			alignGridLine(0);								// Align to grid and localise y position
 			Robot.current.turnToHeading(1);					// Turn to xLocalise cell and
-			alignGridLine();								// Align to grid line and localise x position
+			alignGridLine(1);								// Align to grid line and localise x position
 			Robot.current.turnToHeading(initialHeading);
 			
 			posiConfidence = 1.0f;
@@ -232,30 +232,53 @@ public class Localisation {
 		return foundEdges;
 	}
 	
-	public void alignWithEdge() {
+	public void alignWithEdge(int desiredHeading) {
+		// Need to add catch for if the robot passed a tile.
 		MovePilot pilot = Robot.current.getPilot();
 		
 		pilot.forward();
-		while(!Robot.current.bothBumpersPressed()) {
+		while(!Robot.current.bothBumpersPressed() && !Robot.current.passedLine()) {	// While we haven't hit an object or crossed a line, sample
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		pilot.stop();
-		pilot.travel(-4);
-		oriConfidence = 1.0f;
+		
+		if(Robot.current.bothBumpersPressed()) {	// If we've hit an edge, we've localised
+			pilot.stop();
+			pilot.travel(-4.0f);
+			oriConfidence = 1.0f;
+		} else {									// Otherwise, we've crossed the line, so re-centre. Don't update confidence. 
+			pilot.travel(-13.0f);
+			Robot.current.getMap().getTile(desiredHeading).view(true);
+			// and update tile to change occupied belief
+		}
+		
 	}
 	
-	public void alignGridLine() {
+	public void alignGridLine(int desiredHeading) {
+		// Need to add a method for if the robot hits an edge
 		MovePilot pilot = Robot.current.getPilot();
 		ColorNames cn;
 		pilot.forward();
-		do{
-			cn = Robot.current.getColorSensor().getCurrentColor();
-		}while(cn != ColorNames.BLACK);
-		pilot.travel(-13.0f);
+		
+		while(!Robot.current.bothBumpersPressed() && !Robot.current.passedLine()) {	// While we haven't hit an object or crossed a line, sample
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(Robot.current.passedLine()) {
+			pilot.travel(-13.0f);
+		} else {
+			pilot.stop();				
+			pilot.travel(-4.0f);
+			Robot.current.getMap().getTile(desiredHeading).view(false);
+		}
+		
 	}
 	
 	public boolean getEdgePresent() {
