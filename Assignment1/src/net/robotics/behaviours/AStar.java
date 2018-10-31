@@ -1,4 +1,5 @@
 package net.robotics.behaviours;
+import java.io.File;
 import java.util.LinkedList;
 
 import lejos.hardware.Button;
@@ -33,6 +34,8 @@ public class AStar implements Behavior {
 	}
 
 	public void action() {
+		File f = new File("barking.wav");
+		Robot.current.getAudio().playSample(f,100);
 		Robot.current.getLED().setPattern(1);
 		
 		suppressed = false;
