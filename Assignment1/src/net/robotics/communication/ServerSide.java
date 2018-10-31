@@ -18,17 +18,25 @@ import net.robotics.screen.*;
 //import net.robotics.
 
 public class ServerSide extends Thread{
-	
+
 	public static final int port = 4645;
 	public static final String ip = "192.168.70.64";
 	//public static Map mapel = new Map(6,7); 
 	//LCDRenderer screen;
 	//LCD lcd;
 	ServerSocket server;
-	
+
 	Graphics2D graph;
-	
-	public ServerSide() {
+	private int delay;
+	Socket client;
+
+	public ServerSide(int delay) {
+		this.setDaemon(true);
+		this.delay = delay;
+	}
+
+
+	public synchronized void start() {
 		try {
 			server = new ServerSocket(port);
 			LCD.drawString("Awaiting client..", 30, 56);
@@ -36,26 +44,50 @@ public class ServerSide extends Thread{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public void startServer(Robot robot) throws IOException {
-		try{
-			Socket client = server.accept();
-			LCD.drawString("CONNECTED", 30 , 58);
-			OutputStream out = client.getOutputStream();
-			DataOutputStream dOut = new DataOutputStream(out);
-			Gson gson = new Gson();
-			//mapel.getTile(1, 3).view(false);
-			dOut.writeUTF(gson.toJson(robot.getMap()));
-			dOut.flush();
-			server.close();
-		} 
-		catch(IOException e){
-			System.out.println(e.toString());
-		} 
-				
-	}	
 		
-	
+		super.start();
+	}
+
+
+
+	@Override
+	public void run() {
+		
+		DataOutputStream out = null;
+		Gson gson = new Gson();
+		
+		while(true){
+			
+
+			try{
+				if(client == null){
+					client = server.accept();
+					LCD.drawString("CONNECTED", 30 , 58);
+					out = new DataOutputStream(client.getOutputStream());
+				}
+				
+				out.writeUTF(gson.toJson(Robot.current.getMap()));
+				out.flush();
+			} 
+			catch(IOException e){
+				System.out.println(e.toString());
+			}
+
+			try{
+				sleep(delay);
+			} catch(Exception e){
+
+			}
+		}
+	}
+
+
+
+	public void startServer() throws IOException {
+
+
+	}	
+
+
 
 }

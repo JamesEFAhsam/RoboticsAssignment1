@@ -77,8 +77,6 @@ public class Robot {
 
 	public static void main(String[] args) throws IOException{
 		new Robot();
-		ServerSide server = new ServerSide();
-		server.startServer(current);
 		current.startRobot();
 		current.closeProgram();
 	}
@@ -130,6 +128,9 @@ public class Robot {
 		
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
+		
+		server = new ServerSide(100);
+		server.start();
 		
 		setUpBehaviors();
 		

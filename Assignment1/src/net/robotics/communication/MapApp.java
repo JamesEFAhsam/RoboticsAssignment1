@@ -63,19 +63,20 @@ public class MapApp extends JFrame {
 		private int tileSize = 75;
 		private final String name = "FENTON!";
 		private Map map;
+		private JButton btn;
 		//private Map loadedMap;
 
 
 		public MapCanvas(Map map) {
 			this.map = map;
-			JLabel title = new JLabel("Fenton LIVE™", JLabel.LEFT);
+			JLabel title = new JLabel("Fenton LIVEï¿½", JLabel.LEFT);
 			
-			JButton btn = new JButton("Connect to Fenton");
+			btn = new JButton("Connect");
 			ButtonListener bl = new ButtonListener();
 			btn.addActionListener(bl);
 			txtIPAddress = new TextField("192.168.70.64",16);
-			messages = new TextArea("status: DISCONNECTED");
-		    messages.setEditable(false);
+			messages = new TextArea("status: Started Up");
+		    messages.setEditable(true);
 		    this.add(title);
 			//JPanel north = new JPanel(new FlowLayout(FlowLayout.LEFT)); //not working when use, could use help figuring out how to use it
 		    this.add(btn);
@@ -101,7 +102,9 @@ public class MapApp extends JFrame {
 		
 		private class ButtonListener implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
+				
 			      String command = e.getActionCommand();
+			      messages.setText(command);
 			      if (command.equals("Connect")) {
 			        try {
 			          Socket socket = new Socket("192.168.70.64", port);
@@ -112,10 +115,10 @@ public class MapApp extends JFrame {
 			          String str = dIn.readUTF();
 			          Map loadedMap = gson.fromJson(str, Map.class);
 			          messages.setText("status: CONNECTED");
-			          btn.setLabel("Disconnect");
+			          btn.setText("Disconnect");
 			        } catch (Exception exc) {
 			          messages.setText("status: FAILURE Error establishing connection with server.");
-			          System.out.println("Error: " + exc);
+			          exc.printStackTrace();
 			        }
 			      }
 			      else if (command.equals("Disconnect")) {
@@ -127,7 +130,7 @@ public class MapApp extends JFrame {
 		    try {
 		      sendCommand(CLOSE);
 		      socket.close();
-		      btn.setLabel("Connect");
+		      btn.setText("Connect");
 		      messages.setText("status: DISCONNECTED");
 		    } catch (Exception exc) {
 		      messages.setText("status: FAILURE Error closing connection with server.");
