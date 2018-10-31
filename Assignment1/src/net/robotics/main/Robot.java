@@ -1,13 +1,9 @@
 package net.robotics.main;
 
-<<<<<<< HEAD
+
 import java.io.IOException;
-
-=======
 import java.io.File;
-
 import lejos.hardware.Audio;
->>>>>>> master
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;

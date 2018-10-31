@@ -151,16 +151,22 @@ public class Map {
 	}
 	
 	public void moveRobotPos(int heading) {
+		int dx = 0; int dy = 0;
 		if(heading == 0){
-			this.robotY += 1;
+			dy = 1;
 		} else if(heading == 1){
-			this.robotX += 1;
+			dx = 1;
 		} else if(heading == 2){
-			this.robotY -= 1;
+			dy = -1;
 		} else if(heading == 3){
-			this.robotX -= 1;
+			dy = -1;
 		}
-		updateRobotTile();
+		
+		if((this.robotX+dx) >= 0 && (this.robotX+dx) < width && (this.robotY+dy) >= 0 && (this.robotY+dy) < height){
+			this.robotX += dx;
+			this.robotY += dy;
+			updateRobotTile();
+		}
 	}
 	
 	public boolean canMove(int x, int y){
