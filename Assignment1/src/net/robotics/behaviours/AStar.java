@@ -35,7 +35,7 @@ public class AStar implements Behavior {
 
 	public void action() {
 		File f = new File("barking.wav");
-		Robot.current.getAudio().playSample(f,100);
+		Robot.current.getSoundMonitor().playSound(f);
 		Robot.current.getLED().setPattern(1);
 		
 		suppressed = false;
