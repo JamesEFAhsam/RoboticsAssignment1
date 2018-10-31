@@ -16,7 +16,6 @@ public class IceSlideBehavior implements Behavior{
 	private ColorSensorMonitor colorSensor;
 	private MovePilot pilot;
 	private Map map;
-	private LCDRenderer screen;
 	
 	private int iteration = 0;
 	private int amount = 0;
@@ -26,7 +25,6 @@ public class IceSlideBehavior implements Behavior{
 		colorSensor = Robot.current.getColorSensor();
 		pilot = Robot.current.getPilot();
 		map = Robot.current.getMap();
-		screen = Robot.current.getScreen();
 	}
 
 	public void suppress() {
@@ -40,19 +38,12 @@ public class IceSlideBehavior implements Behavior{
 		
 
 		while(!suppressed){
-			Robot.current.screen.clearScreen();
-			Robot.current.screen.writeTo(new String[]{
-					"Ice Slide: " + iteration,
-					"Amount: " + Robot.current.overrideVisitAmount
-			}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
-
-			
 
 			if(Button.ESCAPE.isDown())
 				Robot.current.closeProgram();
 			
 			Robot.current.observe(map.getRobotHeading());
-			screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
+			displayScreen();
 
 			if((!map.beenVisited(map.getRobotHeading()) || visitOverride) && map.canMove(map.getRobotHeading())){
 				//then move
@@ -64,29 +55,19 @@ public class IceSlideBehavior implements Behavior{
 				else {
 					map.moveRobotPos(map.getRobotHeading());
 	
-					Robot.current.observe(map.getRobotHeading());
-					screen.clearScreen();
-					Robot.current.screen.writeTo(new String[]{
-							"Ice Slide: " + iteration,
-							"Amount: " + Robot.current.overrideVisitAmount
-					}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
-					screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
-	
 					visitOverride = false;
 					amount = 0;
 				}
-
+				
+				displayScreen();
 			} else{
 				//then rotate to find 
 
 				Robot.current.turnToHeading(map.getRobotHeading()+1);
+				displayScreen();
+				
 				Robot.current.observe(map.getRobotHeading());
-				screen.clearScreen();
-				Robot.current.screen.writeTo(new String[]{
-						"Ice Slide: " + iteration,
-						"Amount: " + Robot.current.overrideVisitAmount
-				}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
-				screen.drawMap(screen.getWidth()-8-map.getWidth()*16, -4, map);
+				displayScreen();
 
 				amount++;
 				if(amount >= 4){
@@ -100,13 +81,20 @@ public class IceSlideBehavior implements Behavior{
 				suppress();
 			}
 			
-			if(Button.ESCAPE.isDown())
-				Robot.current.closeProgram();
+			
 
 			iteration++;
 			Thread.yield();
 		}
 
+	}
+	
+	public void displayScreen(){
+		Robot.current.screen.clearScreen();
+		Robot.current.screen.writeTo(new String[]{
+				"Ice Slide: " + iteration
+		}, Robot.current.screen.getWidth(), 0, GraphicsLCD.RIGHT, Font.getSmallFont());
+		Robot.current.screen.drawMap(Robot.current.screen.getWidth()-8-map.getWidth()*16, -4, map);
 	}
 
 	public boolean takeControl() {
