@@ -27,7 +27,7 @@ public class ClientSide  {
 	TextField txtIPAddress;TextArea messages;Button btnConnect;
 	
 	public static void main(String[] args) throws IOException {
-		String ip = "127.0.0.1"; 
+		String ip = "192.168.70.64"; 
 		
 		if(args.length > 0)
 			ip = args[0];

@@ -3,27 +3,32 @@ package net.robotics.communication;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import com.google.gson.Gson;
 
 import net.robotics.map.Map;
 import net.robotics.map.Tile;
 import net.robotics.main.Robot;
 
 public class MapApp extends JFrame {
-	/**
+	 /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	JPanel jp;
 	Graphics g;
-	
+	public Map testMap;
 	TextArea messages;
 	Button btn;
 	TextField txtIPAddress;
@@ -53,9 +58,12 @@ public class MapApp extends JFrame {
 	class MapCanvas extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private static final int CLOSE = 0;
-		private Map map;
+		public static final int port = 4645;
+		
 		private int tileSize = 75;
 		private final String name = "FENTON!";
+		private Map map;
+		//private Map loadedMap;
 
 
 		public MapCanvas(Map map) {
@@ -65,13 +73,14 @@ public class MapApp extends JFrame {
 			JButton btn = new JButton("Connect to Fenton");
 			ButtonListener bl = new ButtonListener();
 			btn.addActionListener(bl);
-			txtIPAddress = new TextField("127.0.0.1",16);
+			txtIPAddress = new TextField("192.168.70.64",16);
 			messages = new TextArea("status: DISCONNECTED");
 		    messages.setEditable(false);
 		    this.add(title);
-			JPanel north = new JPanel(new FlowLayout(FlowLayout.LEFT)); //not working when use, could use help figuring out how to use it
+			//JPanel north = new JPanel(new FlowLayout(FlowLayout.LEFT)); //not working when use, could use help figuring out how to use it
 		    this.add(btn);
 		    this.add(txtIPAddress);
+		    this.add(messages);
 		    
 		    this.add(title);
 			//this.add(btn);
@@ -95,8 +104,13 @@ public class MapApp extends JFrame {
 			      String command = e.getActionCommand();
 			      if (command.equals("Connect")) {
 			        try {
-			          Socket socket = new Socket(txtIPAddress.getText(), 9090);
+			          Socket socket = new Socket("192.168.70.64", port);
 			          DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
+			          InputStream in = socket.getInputStream();
+			          DataInputStream dIn = new DataInputStream(in);
+			          Gson gson = new Gson();
+			          String str = dIn.readUTF();
+			          Map loadedMap = gson.fromJson(str, Map.class);
 			          messages.setText("status: CONNECTED");
 			          btn.setLabel("Disconnect");
 			        } catch (Exception exc) {
@@ -120,8 +134,10 @@ public class MapApp extends JFrame {
 		      System.out.println("Error: " + exc);
 		    }
 		  }
+		
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
+			
 			
 			for (int x = 0; x < map.getWidth(); x++) {
 				for (int y = 0; y < map.getHeight(); y++) {
@@ -149,11 +165,6 @@ public class MapApp extends JFrame {
 					String forline = "(x,y) =" + "("+currentTile.getX()+","+currentTile.getY()+")";
 					String fifline = "O.B.:" +currentTile.getOccupiedBelief();
 					
-					
-					//float obc = 0.65f;
-					//float robotLOB = 0.45f;
-					//float robotHOB = 0.75f;
-					
 					if (x == map.getRobotX() && y == map.getRobotY()) {
 						g.drawString(name, (x*tileSize)+50+20, (y*tileSize)+100+40);
 					}
@@ -171,25 +182,8 @@ public class MapApp extends JFrame {
 						
 					}
 					
-					//state, visited full / visited,  occupancy belief, visited amounts
-					
-					//visited = visited - occupancy
-					
-					//tile.visit() increments visited
-					// tile.view(boolean) increments viewed
-					// tile.getOccupiedBelief() returns int visited
-					// tile.getVisitAmount()
-					// tile.getEmpty() tile.getViewed()
-					
-					
-					
 				}
-			}
-			
-			
+			}	
 		}
-		
-		
-		
 	}
 }
