@@ -1,5 +1,8 @@
 package net.robotics.main;
 
+import java.io.File;
+
+import lejos.hardware.Audio;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
@@ -43,6 +46,7 @@ public class Robot {
 	private ColorSensorMonitor colorSensor;
 	private UltrasonicSensorMonitor ultrasonicSensor;
 	private LED led;
+	private Audio audio;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
@@ -82,6 +86,7 @@ public class Robot {
 		
 		Brick myEV3 = BrickFinder.getDefault();
 		led = myEV3.getLED();
+		audio = myEV3.getAudio();
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 		
 		screen.clearScreen();
@@ -441,5 +446,9 @@ public class Robot {
 	
 	public LED getLED() {
 		return led;
+	}
+	
+	public Audio getAudio() {
+		return audio;
 	}
 }

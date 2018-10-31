@@ -1,5 +1,7 @@
 package net.robotics.behaviours;
 
+import java.io.File;
+
 import lejos.hardware.Button;
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
@@ -34,6 +36,8 @@ public class IceSlideBehavior implements Behavior{
 	}
 
 	public void action() {
+		File f = new File("panting.wav");
+		Robot.current.getAudio().playSample(f,100);
 		Robot.current.getLED().setPattern(3);
 		suppressed = false;
 
