@@ -6,6 +6,8 @@ import lejos.hardware.Audio;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
+import lejos.hardware.Key;
+import lejos.hardware.KeyListener;
 import lejos.hardware.LED;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
@@ -135,7 +137,11 @@ public class Robot {
 		
 		setUpBehaviors();
 		
+		createKeyListeners();
+		
 		arbitrator.go();
+		
+		
 	}
 	
 	private void setUpBehaviors() {
@@ -153,6 +159,31 @@ public class Robot {
 	public void closeProgram(){
 		arbitrator.stop();
 		System.exit(0);
+	}
+	
+	private void createKeyListeners(){
+		Button.ESCAPE.addKeyListener(new KeyListener() {
+			public void keyReleased(Key k) {
+				Robot.current.closeProgram();
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void keyPressed(Key k) {
+			}
+		});
+		
+		
+		Button.RIGHT.addKeyListener(new KeyListener() {
+			public void keyReleased(Key k) {
+				Robot.current.getScreen().cycleMode();
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void keyPressed(Key k) {
+			}
+		});
 	}
 
 	public void mainLoop(){

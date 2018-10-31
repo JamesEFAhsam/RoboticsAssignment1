@@ -18,6 +18,8 @@ public class AStar implements Behavior {
 	private AStarSearch search;
 	private Map map;
 	
+	private int iteration = 0;
+	
 	private boolean justRan = false;
 	
 	private Tile leastKnown;
@@ -36,22 +38,11 @@ public class AStar implements Behavior {
 		Robot.current.getAudio().playSample(f,100);
 		Robot.current.getLED().setPattern(1);
 		
-		Robot.current.screen.clearScreen();
-		Robot.current.screen.writeTo(new String[]{
-				"Running: "
-		}, 0, 20, GraphicsLCD.LEFT, Font.getDefaultFont());
-
-		int iteration = 0;
-		
 		suppressed = false;
 
 		while (!suppressed) {
-			Robot.current.screen.clearScreen();
-			Robot.current.screen.writeTo(new String[]{
-					"A Star: " + iteration
-			}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
-
 			iteration++;
+			displayScreen();
 
 			Tile robotTile = map.getTile(map.getRobotX(), map.getRobotY());
 			
@@ -66,16 +57,14 @@ public class AStar implements Behavior {
 
 			int heading = map.getHeading(nextTile.getX() - robotTile.getX(), 
 					nextTile.getY() - robotTile.getY());
-			
-			Robot.current.screen.drawMap(Robot.current.screen.getWidth()-8-map.getWidth()*16, -4, map);
+
+			displayScreen();
 
 			Robot.current.screen.writeTo(new String[]{
-					"T: " + nextTile.getX() + "/" + nextTile.getY()
-			}, 0, 20, GraphicsLCD.LEFT, Font.getSmallFont());
+					"N: " + nextTile.getX() + "/" + nextTile.getY()
+			}, 0, Robot.current.screen.getHeight()-10, GraphicsLCD.BOTTOM, Font.getSmallFont());
 			
-			Robot.current.screen.writeTo(new String[]{
-					"N: " + leastKnown.getX() + "/" + leastKnown.getY()
-			}, 0, 40, GraphicsLCD.LEFT, Font.getSmallFont());
+			
 
 			if(heading != map.getRobotHeading()){
 				Robot.current.observe(map.getRobotHeading());
@@ -84,6 +73,7 @@ public class AStar implements Behavior {
 
 
 			Robot.current.observe(map.getRobotHeading());
+			
 			boolean sucessful = Robot.current.MoveSquares(1);
 
 			if(!sucessful){
@@ -91,9 +81,8 @@ public class AStar implements Behavior {
 			} else {
 				map.moveRobotPos(map.getRobotHeading());
 			}
-
-			if(Button.ESCAPE.isDown())
-				Robot.current.closeProgram();
+			
+			displayScreen();
 			
 			if(map.getRobotX() == leastKnown.getX() && map.getRobotY() == leastKnown.getY()){
 				Robot.current.overrideVisitAmount = 0;
@@ -104,12 +93,27 @@ public class AStar implements Behavior {
 			Thread.yield();
 		}
 	}
+	
+	public void displayScreen(){
+		Robot.current.screen.clearScreen();
+		Robot.current.screen.writeTo(new String[]{
+				"A Star: " + iteration
+		}, Robot.current.screen.getWidth(), 0, GraphicsLCD.RIGHT, Font.getSmallFont());
+		Robot.current.screen.drawMap(Robot.current.screen.getWidth()-8-map.getWidth()*16, -4, map);
+		
+		if(leastKnown != null){
+			Robot.current.screen.writeTo(new String[]{
+					"T: " + leastKnown.getX() + "/" + leastKnown.getY()
+			}, 0, Robot.current.screen.getHeight(), GraphicsLCD.BOTTOM, Font.getSmallFont());
+		}
+	}
 
 	public boolean takeControl() {
 		if(justRan){
 			justRan = false;
 			return false;
 		}
+		iteration = 0;
 		return true;
 	}
 }
