@@ -1,10 +1,18 @@
 package net.robotics.main;
 
+<<<<<<< HEAD
 import java.io.IOException;
 
+=======
+import java.io.File;
+
+import lejos.hardware.Audio;
+>>>>>>> master
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.Button;
+import lejos.hardware.Key;
+import lejos.hardware.KeyListener;
 import lejos.hardware.LED;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.Font;
@@ -22,6 +30,7 @@ import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import lejos.robotics.SampleProvider;
 import net.robotics.behaviours.AStar;
+import net.robotics.behaviours.Finalisation;
 import net.robotics.behaviours.IceSlideBehavior;
 import net.robotics.behaviours.LocaliseBehavior;
 import net.robotics.map.Map;
@@ -46,6 +55,7 @@ public class Robot {
 	private ColorSensorMonitor colorSensor;
 	private UltrasonicSensorMonitor ultrasonicSensor;
 	private LED led;
+	private Audio audio;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
@@ -67,9 +77,12 @@ public class Robot {
 	private static float[] leftSample = new float[leftTouch.sampleSize()];
 	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
+	private boolean mapFinished;
+	
 	private LocaliseBehavior b1;
 	private IceSlideBehavior b2;
 	private AStar b3;
+	private Finalisation b4;
 	
 	public static Robot current;
 	
@@ -78,7 +91,6 @@ public class Robot {
 	public static void main(String[] args) throws IOException{
 		new Robot();
 		current.startRobot();
-		current.closeProgram();
 	}
 
 	public Robot() {
@@ -86,6 +98,7 @@ public class Robot {
 		
 		Brick myEV3 = BrickFinder.getDefault();
 		led = myEV3.getLED();
+		audio = myEV3.getAudio();
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 		//server = new ServerSide();
 		screen.clearScreen();
@@ -124,7 +137,7 @@ public class Robot {
 	
 	private void startRobot() {
 		pilot = ChasConfig.getPilot();
-		pilot.setLinearSpeed(10);
+		pilot.setLinearSpeed(12);
 		
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
@@ -134,14 +147,19 @@ public class Robot {
 		
 		setUpBehaviors();
 		
+		createKeyListeners();
+		
 		arbitrator.go();
+		
+		
 	}
 	
 	private void setUpBehaviors() {
 		b1 = new LocaliseBehavior();
 		b2 = new IceSlideBehavior();
 		b3 = new AStar(getMap());
-		Behavior[] behaviors = {b3, b2, b1};			// Behavior priority, where [0] is lowest priority
+		b4 = new Finalisation();
+		Behavior[] behaviors = {b4, b3, b2, b1};			// Behavior priority, where [0] is lowest priority
 		arbitrator = new CustomArbitrator(behaviors, false); // NEED TO ADD BEHAVIORS
 		//LCD.drawString("Begone", 0, 0);
 		//LCD.drawString("Begone", 0, 1);
@@ -149,7 +167,33 @@ public class Robot {
 	}
 	
 	public void closeProgram(){
+		arbitrator.stop();
 		System.exit(0);
+	}
+	
+	private void createKeyListeners(){
+		Button.ESCAPE.addKeyListener(new KeyListener() {
+			public void keyReleased(Key k) {
+				Robot.current.closeProgram();
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void keyPressed(Key k) {
+			}
+		});
+		
+		
+		Button.RIGHT.addKeyListener(new KeyListener() {
+			public void keyReleased(Key k) {
+				Robot.current.getScreen().cycleMode();
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void keyPressed(Key k) {
+			}
+		});
 	}
 
 	public void mainLoop(){
@@ -448,5 +492,17 @@ public class Robot {
 	
 	public LED getLED() {
 		return led;
+	}
+	
+	public Audio getAudio() {
+		return audio;
+	}
+	
+	public void setMapFinished(boolean mapFinished) {
+		this.mapFinished = mapFinished;
+	}
+	
+	public boolean getMapFinished() {
+		return mapFinished;
 	}
 }

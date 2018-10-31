@@ -1,4 +1,6 @@
 package net.robotics.behaviours;
+import java.io.File;
+
 import lejos.hardware.lcd.Font;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.subsumption.Behavior;
@@ -18,19 +20,28 @@ public class LocaliseBehavior implements Behavior{
 	}
 	
 	public void action() {
+		File f = new File("fenton.wav");
+		Robot.current.getAudio().playSample(f,100);
 		Robot.current.getLED().setPattern(2);
+		
 		suppressed = false;
 		while (!suppressed) {
-			Robot.current.screen.clearScreen();
-			Robot.current.screen.writeTo(new String[]{
-					"Localisation"
-			}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
-			Robot.current.getLocalisation().localiseRobot();
+			displayScreen();
+			
+			localisation.localiseRobot();
 			
 			suppress();
 			
 			Thread.yield();
 		}
+	}
+	
+	public void displayScreen(){
+		Robot.current.screen.clearScreen();
+		Robot.current.screen.writeTo(new String[]{
+				"Localisation: "
+		}, Robot.current.screen.getWidth(), 0, GraphicsLCD.RIGHT, Font.getSmallFont());
+		Robot.current.screen.drawMap(Robot.current.screen.getWidth()-8-Robot.current.getMap().getWidth()*16, -4, Robot.current.getMap());
 	}
 	
 	public boolean takeControl() {

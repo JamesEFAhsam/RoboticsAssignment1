@@ -94,7 +94,7 @@ public class Localisation {
 		public void localise2Edges(boolean[] foundEdges) {
 			Robot.current.screen.writeTo(new String[]{
 					"Two+ Edges"
-			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
+			}, 0, Robot.current.screen.getHeight(), GraphicsLCD.BOTTOM, Font.getSmallFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			int xLocaliseCell;
 			int yLocaliseCell;
@@ -123,8 +123,8 @@ public class Localisation {
 		// Localises using 1 edge, and 1 space
 		public void localise1Edge(boolean[] foundEdges) {
 			Robot.current.screen.writeTo(new String[]{
-					"One Edge and One Space"
-			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
+					"1 Edge, 1 Space"
+			}, 0, Robot.current.screen.getHeight(), GraphicsLCD.BOTTOM, Font.getSmallFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			int xLocaliseCell;
 			int yLocaliseCell;
@@ -163,7 +163,7 @@ public class Localisation {
 		public void localise0Edge(boolean[] foundEdges) {
 			Robot.current.screen.writeTo(new String[]{
 					"2 Spaces"
-			}, 0, 80, GraphicsLCD.LEFT, Font.getDefaultFont());
+			}, 0, Robot.current.screen.getHeight(), GraphicsLCD.BOTTOM, Font.getSmallFont());
 			int initialHeading = Robot.current.getMap().getRobotHeading();
 			
 			Robot.current.turnToHeading(0);					// Turn to yLocalise cell and 
