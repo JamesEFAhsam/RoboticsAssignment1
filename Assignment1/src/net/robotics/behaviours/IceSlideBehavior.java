@@ -20,7 +20,6 @@ public class IceSlideBehavior implements Behavior{
 	private Map map;
 	
 	private int iteration = 0;
-	private int amount = 0;
 	private boolean visitOverride = false;
 
 	public IceSlideBehavior () {
@@ -60,22 +59,22 @@ public class IceSlideBehavior implements Behavior{
 					map.moveRobotPos(map.getRobotHeading());
 	
 					visitOverride = false;
-					amount = 0;
 				}
 				
 				displayScreen();
 			} else{
-				//then rotate to find 
-
-				Robot.current.turnToHeading(map.getRobotHeading()+1);
-				displayScreen();
 				
-				Robot.current.observe(map.getRobotHeading());
-				displayScreen();
-
-				amount++;
-				if(amount >= 4){
-					amount = 0;
+				boolean isFreeSquare = false;
+				
+				for (int i = 0; i < 3; i++) {
+					if(!map.beenVisited(i) && map.canMove(i)){
+						Robot.current.turnToHeading(i);
+						displayScreen();
+						isFreeSquare = true;
+					}
+				}
+				
+				if(!isFreeSquare){
 					visitOverride = true;
 					Robot.current.overrideVisitAmount++;
 				}
