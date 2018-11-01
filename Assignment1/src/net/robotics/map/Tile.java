@@ -7,12 +7,8 @@ public class Tile {
 	private float occupiedBelief;
 	private int visited;
 	private int x, y;
-	//NEW FIELDS
-	private float g_score = 0;
-	private float h_score = 0;
-	private Tile cameFrom = null;
-	private ArrayList <Tile> tilesArray = new ArrayList<Tile>();
-	static final int FACTOR = 10;
+	
+	private boolean unreachable;
 	//
 	
 	private int empty, viewed;
@@ -24,6 +20,7 @@ public class Tile {
 		this.viewed = 0;
 		this.empty = 0;
 		this.visited = 0;
+		this.setUnreachable(false);
 		
 		//this.view(false);
 		//this.view(true);
@@ -77,66 +74,16 @@ public class Tile {
 		this.y = y;
 	}
 	
-	//NEW METHODS
-	public Collection <Tile> getTiles() {
-		return tilesArray;
+	public void setUnreachable(boolean isUnreachable){
+		this.unreachable = isUnreachable;
 	}
-	
-	public int numberofTiles() {
-		return tilesArray.size();
-	}
-	
-	public boolean addNewTile(Tile nextTile) {
-		if(tilesArray.contains(nextTile)) {
-			return false;
-		}
-		if(nextTile == this) {
-			return false;
-		}
-		tilesArray.add(nextTile);
-		return true;
-	}
-	
-	public boolean removeTile(Tile nextTile) {
-		return tilesArray.remove(nextTile);
-	}
-	
-	protected void setH_Score(float h) {
-		h_score = h;
-	}
-	
-	public double calculateG(Tile nextTile) {
-		double xDistance = this.x - nextTile.x;
-		double yDistance = this.y - nextTile.y;
-		double distance = Math.sqrt( (xDistance*xDistance) + (yDistance*yDistance));		
-		return distance;
+
+	public boolean isReachable() {
+		if(getVisitAmount() > 0)
+			return true;
 		
+		return !unreachable;
 	}
-	
-	protected double calculateH(Tile targetTile) {
-		return calculateG(targetTile);
-	}
-	
-	protected void setG_Score(float g) {
-		g_score = g;
-	}
-	
-	protected float getG_Score(){
-		return g_score;
-	}
-	
-	protected float getF_Score(){
-		return g_score + h_score;
-	}
-	
-	protected Tile getPredecessor() {
-		return cameFrom;
-	}
-	
-	protected void setPredecessor(Tile origin) {
-		cameFrom = origin;
-	}
-	//
 	
 	
 }
