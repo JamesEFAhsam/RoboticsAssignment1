@@ -121,8 +121,6 @@ public class MapApp extends JFrame {
 	}
 
 	private Map getMap() throws UnknownHostException, IOException{
-
-
 		InputStream in = socket.getInputStream();
 		DataInputStream dIn = new DataInputStream(in);
 		String str = dIn.readUTF();
@@ -145,9 +143,6 @@ public class MapApp extends JFrame {
 				try {
 					connect();
 					messages.setText("status: CONNECTED");
-
-					Map mappy = getMap();
-					mapCanvas.UpdateMap(mappy);
 
 					btn.setText("Disconnect");
 				} catch (Exception exc) {

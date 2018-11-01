@@ -51,6 +51,11 @@ public class AStar implements Behavior {
 				
 				leastKnown = search.getLeastVisitedNode();
 				path = search.searchForPath(robotTile, leastKnown);
+				
+				if(path == null)
+					leastKnown.setUnreachable(true);
+				else
+					leastKnown.setUnreachable(false);
 			}
 
 			Tile nextTile = path.pop();
