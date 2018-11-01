@@ -27,7 +27,8 @@ public class UltrasonicSensorMonitor extends Thread{
 		this.ultrasonicSensor = sensor;
 		this.motor = motor;
 		
-		this.motor.setAcceleration(3000);
+		this.motor.setAcceleration(5000);
+		this.motor.setSpeed(720);
 		
 		this.sample = new float[sensor.getDistanceMode().sampleSize()];
 		this.robot = robot;

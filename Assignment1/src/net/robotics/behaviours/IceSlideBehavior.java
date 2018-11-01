@@ -53,9 +53,16 @@ public class IceSlideBehavior implements Behavior{
 
 				boolean sucessful = Robot.current.MoveSquares(1);
 				
-				if(!sucessful)
+				if(!sucessful){
 					map.getTile(map.getRobotHeading()).view(false);
-				else {
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+					map.getTile(map.getRobotHeading()).view(false);
+				}else {
 					map.moveRobotPos(map.getRobotHeading());
 	
 					visitOverride = false;

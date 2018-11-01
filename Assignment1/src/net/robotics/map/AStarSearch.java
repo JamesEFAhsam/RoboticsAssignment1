@@ -141,6 +141,14 @@ public class AStarSearch {
 		return null;
 	}
 	
+	public static boolean isInSet(ArrayList<Tile> tiles, Tile n){
+		for (Tile tile : tiles) {
+			if((tile == n))
+				return true;
+		}
+		return false;
+	}
+	
 	private boolean isInSet(ArrayList<Node> tiles, Node n){
 		for (Node tile : tiles) {
 			if(areNodesEqual(tile, n))

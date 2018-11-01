@@ -60,6 +60,7 @@ public class LCDRenderer{
 		case OccupancyBelief:
 			mode = Mode.Nothing;
 			break;
+		case Nothing:
 		default:
 			mode = Mode.VisitInfo;
 			break;
@@ -266,10 +267,11 @@ public class LCDRenderer{
 		writeTo(new String[]{
 				"X: " + map.getRobotX(),
 				"Y: " + map.getRobotY(),
+				"H: " + map.getRobotHeading(),
 				"V: " + map.getTile(map.getRobotX(), map.getRobotY()).getViewed(),
 				"E: " + map.getTile(map.getRobotX(), map.getRobotY()).getEmpty(),
 				"Vs: " + map.getTile(map.getRobotX(), map.getRobotY()).getVisitAmount()
-		}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+		}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 
 		for (int tileX = 0; tileX < map.getWidth(); tileX++) {
 			for (int tileY = 0; tileY < map.getHeight(); tileY++) {

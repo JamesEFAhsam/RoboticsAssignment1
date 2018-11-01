@@ -34,7 +34,7 @@ public class Localisation {
 	private float oriConfidence; 	//Orientation confidence. 
 	private float posiConfidence;	//Position confidence.
 	public final float _ORITHRESHOLD = 0.8f; //	NEEDS CALIBRATING
-	public final float _POSITHRESHOLD = 0.7f;// NEEDS CALIBRATING
+	public final float _POSITHRESHOLD = 0.75f;// NEEDS CALIBRATING
 	
 	private final float _CONFIDENCEDEC = 0.05f;
 	
@@ -249,9 +249,25 @@ public class Localisation {
 			pilot.stop();
 			pilot.travel(-4.0f);
 			oriConfidence = 1.0f;
+			
+			Tile tile = Robot.current.getMap().getTile(desiredHeading);
+			if(tile != null){
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+			}
 		} else {									// Otherwise, we've crossed the line, so re-centre. Don't update confidence. 
 			pilot.travel(-13.0f);
-			Robot.current.getMap().getTile(desiredHeading).view(true);
+			
+			Tile tile = Robot.current.getMap().getTile(desiredHeading);
+			if(tile != null){
+				tile.view(true);
+			}
 			// and update tile to change occupied belief
 		}
 		
@@ -276,7 +292,17 @@ public class Localisation {
 		} else {
 			pilot.stop();				
 			pilot.travel(-4.0f);
-			Robot.current.getMap().getTile(desiredHeading).view(false);
+			Tile tile = Robot.current.getMap().getTile(desiredHeading);
+			if(tile != null){
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+				tile.view(false);
+			}
 		}
 		
 	}

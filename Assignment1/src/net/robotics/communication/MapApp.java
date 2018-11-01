@@ -113,7 +113,7 @@ public class MapApp extends JFrame {
 			}
 			
 			try {
-				Thread.sleep((long) (Math.random() * 1000));
+				Thread.sleep(250);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
