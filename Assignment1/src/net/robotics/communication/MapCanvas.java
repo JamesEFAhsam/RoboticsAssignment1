@@ -13,7 +13,7 @@ import net.robotics.map.Tile;
 public class MapCanvas extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	private int tileSize = 75;
+	private int tileSize = 64;
 	private final String name = "FENTON!";
 	private Map map;
 	//private Map loadedMap;
