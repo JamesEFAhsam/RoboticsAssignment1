@@ -1,7 +1,8 @@
 package net.robotics.main;
 
-import java.io.File;
 
+import java.io.IOException;
+import java.io.File;
 import lejos.hardware.Audio;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
@@ -33,6 +34,7 @@ import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 import net.robotics.sensor.UltrasonicSensorMonitor;
+import net.robotics.communication.ServerSide;
 
 public class Robot {
 
@@ -55,6 +57,7 @@ public class Robot {
 	private Map map;
 	private Localisation localisation;
 	private CustomArbitrator arbitrator;
+	private ServerSide server;
 	
 	public int overrideVisitAmount = 0;
 	
@@ -81,7 +84,7 @@ public class Robot {
 	
 
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
 		new Robot();
 		current.startRobot();
 	}
@@ -93,7 +96,7 @@ public class Robot {
 		led = myEV3.getLED();
 		audio = new SoundMonitor(myEV3.getAudio());
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
-		
+		//server = new ServerSide();
 		screen.clearScreen();
 		screen.writeTo(new String[]{
 				"Booting..."
@@ -135,6 +138,9 @@ public class Robot {
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
 		
+		server = new ServerSide(100);
+		server.start();
+		
 		setUpBehaviors();
 		
 		createKeyListeners();
@@ -150,8 +156,6 @@ public class Robot {
 		b4 = new Finalisation();
 		Behavior[] behaviors = {b3, b2, b1, b4};			// Behavior priority, where [0] is lowest priority
 		arbitrator = new CustomArbitrator(behaviors, false); // NEED TO ADD BEHAVIORS
-		//LCD.drawString("Begone", 0, 0);
-		//LCD.drawString("Begone", 0, 1);
 		LCD.clearDisplay();
 	}
 	
@@ -268,58 +272,10 @@ public class Robot {
 					visitOverride = true;
 				}
 			}
-			
-			
-			
-
-			//screen.clearScreen();
-			//screen.writeTo(new String[]{"F? "+(colorSensor.getColorFrequency() != null)});
-
-
-
-			/*if(colorSensor.getCurrentColor() == ColorNames.BLACK && prevColor != ColorNames.BLACK){
-				squares++;
-			}
-
-			if(colorSensor.getCurrentColor() != prevColor){
-				prevColor = colorSensor.getCurrentColor();
-			}
-
-			screen.clearScreen();
-			screen.writeTo(new String[]{"Passed through "+squares+" squares.",
-					"Color. " + colorSensor.getCurrentColor(),
-					"Previous. " + prevColor
-					}, screen.getWidth()/2, 0, GraphicsLCD.HCENTER, Font.getSmallFont());
-			screen.drawEscapeButton("QUIT", 0, 100, 45, 45/2, 6);
-			*/
-
-			
-			//Button.waitForAnyPress();
 		}
 	}
 	
 	public void observe(int heading){
-		/*ultrasonicSensor.clear();
-		try {
-			Thread.sleep(60*5);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		ultrasonicSensor.getAssuredDistance();
-		
-		Robot.current.screen.writeTo(new String[]{
-				"P: " + ultrasonicSensor.distance[0],
-				"P: " + ultrasonicSensor.distance[1],
-				"P: " + ultrasonicSensor.distance[2],
-				"P: " + ultrasonicSensor.distance[3],
-				"P: " + ultrasonicSensor.distance[4],
-		}, 0, 75, GraphicsLCD.LEFT, Font.getSmallFont());
-		
-		screen.writeTo(new String[]{
-				"F: " + ultrasonicSensor.getAssuredDistance()
-		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
-		*/
 		ultrasonicSensor.clear();
 		try {
 			Thread.sleep(60*6);
