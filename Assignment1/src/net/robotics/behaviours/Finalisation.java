@@ -19,7 +19,7 @@ public class Finalisation implements Behavior{
 
 	public void action() {
 		File f = new File("tada.wav");
-		Robot.current.getAudio().playSample(f,100);
+		Robot.current.getSoundMonitor().playSound(f);
 		suppressed = false;
 
 		while(!Button.ESCAPE.isDown()) {

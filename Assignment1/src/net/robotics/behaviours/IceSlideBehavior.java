@@ -34,7 +34,7 @@ public class IceSlideBehavior implements Behavior{
 
 	public void action() {
 		File f = new File("panting.wav");
-		Robot.current.getAudio().playSample(f,100);
+		Robot.current.getSoundMonitor().playSound(f);
 		Robot.current.getLED().setPattern(3);
 		suppressed = false;
 

@@ -6,6 +6,7 @@ import lejos.hardware.lcd.GraphicsLCD;
 import lejos.robotics.subsumption.Behavior;
 import net.robotics.main.Localisation;
 import net.robotics.main.Robot;
+import net.robotics.main.SoundMonitor;
 
 public class LocaliseBehavior implements Behavior{
 	public boolean suppressed;
@@ -21,7 +22,7 @@ public class LocaliseBehavior implements Behavior{
 	
 	public void action() {
 		File f = new File("fenton.wav");
-		Robot.current.getAudio().playSample(f,100);
+		Robot.current.getSoundMonitor().playSound(f);
 		Robot.current.getLED().setPattern(2);
 		
 		suppressed = false;
