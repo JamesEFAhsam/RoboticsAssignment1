@@ -1,7 +1,8 @@
 package net.robotics.main;
 
-import java.io.File;
 
+import java.io.IOException;
+import java.io.File;
 import lejos.hardware.Audio;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
@@ -33,6 +34,7 @@ import net.robotics.screen.LCDRenderer;
 import net.robotics.sensor.ColorSensorMonitor;
 import net.robotics.sensor.ColorSensorMonitor.ColorNames;
 import net.robotics.sensor.UltrasonicSensorMonitor;
+import net.robotics.communication.ServerSide;
 
 public class Robot {
 
@@ -55,6 +57,7 @@ public class Robot {
 	private Map map;
 	private Localisation localisation;
 	private CustomArbitrator arbitrator;
+	private ServerSide server;
 	
 	public int overrideVisitAmount = 0;
 	
@@ -81,7 +84,7 @@ public class Robot {
 	
 
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
 		new Robot();
 		current.startRobot();
 	}
@@ -93,7 +96,7 @@ public class Robot {
 		led = myEV3.getLED();
 		audio = new SoundMonitor(myEV3.getAudio());
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
-		
+		//server = new ServerSide();
 		screen.clearScreen();
 		screen.writeTo(new String[]{
 				"Booting..."
@@ -134,6 +137,9 @@ public class Robot {
 		
 		// Create a pose provider and link it to the move pilot
 		opp = new OdometryPoseProvider(pilot);
+		
+		server = new ServerSide(100);
+		server.start();
 		
 		setUpBehaviors();
 		
