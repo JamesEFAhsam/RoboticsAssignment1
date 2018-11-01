@@ -8,7 +8,7 @@ public class Map {
 	private int robotX, robotY;
 	private int robotHeading;
 	
-	public static final float _OCCUPIEDBELIEFCUTOFF = 0.65f;
+	public static final float _OCCUPIEDBELIEFCUTOFF = 0.75f;
 	
 	public Map(int width, int height){
 		this.setWidth(width);
@@ -159,7 +159,7 @@ public class Map {
 		} else if(heading == 2){
 			dy = -1;
 		} else if(heading == 3){
-			dy = -1;
+			dx = -1;
 		}
 		
 		if((this.robotX+dx) >= 0 && (this.robotX+dx) < width && (this.robotY+dy) >= 0 && (this.robotY+dy) < height){
