@@ -51,7 +51,7 @@ public class Robot {
 	private ColorSensorMonitor colorSensor;
 	private UltrasonicSensorMonitor ultrasonicSensor;
 	private LED led;
-	private Audio audio;
+	private SoundMonitor audio;
 	private MovePilot pilot;
 	private OdometryPoseProvider opp;
 	private Map map;
@@ -94,7 +94,7 @@ public class Robot {
 		
 		Brick myEV3 = BrickFinder.getDefault();
 		led = myEV3.getLED();
-		audio = myEV3.getAudio();
+		audio = new SoundMonitor(myEV3.getAudio());
 		screen = new LCDRenderer(LocalEV3.get().getGraphicsLCD());
 		//server = new ServerSide();
 		screen.clearScreen();
@@ -127,7 +127,7 @@ public class Robot {
 
 		colorSensor.configure(true);
 		colorSensor.start();
-		
+		audio.start();
 		ultrasonicSensor.start();
 	}
 	
@@ -490,15 +490,15 @@ public class Robot {
 		return led;
 	}
 	
-	public Audio getAudio() {
-		return audio;
-	}
-	
 	public void setMapFinished(boolean mapFinished) {
 		this.mapFinished = mapFinished;
 	}
 	
 	public boolean getMapFinished() {
 		return mapFinished;
+	}
+	
+	public SoundMonitor getSoundMonitor() {
+		return audio;
 	}
 }
