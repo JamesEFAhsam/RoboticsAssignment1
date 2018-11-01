@@ -140,8 +140,7 @@ public class Robot {
 		createKeyListeners();
 		
 		arbitrator.go();
-		
-		
+			
 	}
 	
 	private void setUpBehaviors() {
@@ -149,7 +148,7 @@ public class Robot {
 		b2 = new IceSlideBehavior();
 		b3 = new AStar(getMap());
 		b4 = new Finalisation();
-		Behavior[] behaviors = {b4, b3, b2, b1};			// Behavior priority, where [0] is lowest priority
+		Behavior[] behaviors = {b3, b2, b1, b4};			// Behavior priority, where [0] is lowest priority
 		arbitrator = new CustomArbitrator(behaviors, false); // NEED TO ADD BEHAVIORS
 		//LCD.drawString("Begone", 0, 0);
 		//LCD.drawString("Begone", 0, 1);
