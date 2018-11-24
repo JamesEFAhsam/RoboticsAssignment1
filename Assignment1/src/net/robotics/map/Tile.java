@@ -8,12 +8,14 @@ public class Tile {
 	private int visited;
 	private int x, y;
 	
+	private boolean permanent;
 	private boolean unreachable;
 	//
 	
 	private int empty, viewed;
 	
 	public Tile(int x, int y){
+		this.permanent = false;
 		this.occupiedBelief = 0.5f;
 		this.setX(x);
 		this.setY(y);
@@ -32,12 +34,20 @@ public class Tile {
 			this.empty++;
 	}
 	
+	
+	// Need to set this to be unchangeable. Create boolean for permanent?
+	// Then that can be used to specify whether or not a value is able to be changed. 
+	public void knownObstacle() {
+		this.occupiedBelief = 1.0f;
+		this.permanent = true;
+	}
+	
 	public float getOccupiedBelief(){
-		if(visited == 0 && this.viewed != 0f){
-			if(this.viewed == 0)
-				return this.occupiedBelief;
-			this.occupiedBelief = (float)(this.viewed-this.empty)/(float)this.viewed;
-		}
+		//if(visited == 0 && this.viewed != 0f){
+		//	if(this.viewed == 0)
+		//		return this.occupiedBelief;
+		//	this.occupiedBelief = (float)(this.viewed-this.empty)/(float)this.viewed;
+		//}
 		return this.occupiedBelief;
 	}
 	
