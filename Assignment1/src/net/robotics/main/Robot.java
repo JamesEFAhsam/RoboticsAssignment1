@@ -38,8 +38,7 @@ import net.robotics.communication.ServerSide;
 
 public class Robot {
 	public LCDRenderer screen;
-	private ColorSensorMonitor colorSensor;
-	private UltrasonicSensorMonitor ultrasonicSensor;
+	private ColorSensorMonitor leftColorSensor, rightColorSensor;
 	private LED led;
 	private SoundMonitor audio;
 	private MovePilot pilot;
@@ -50,18 +49,6 @@ public class Robot {
 	private ServerSide server;
 	
 	public int overrideVisitAmount = 0;
-	
-	private static Port leftBumpPort = LocalEV3.get().getPort("S1");
-	private static Port rightBumpPort = LocalEV3.get().getPort("S4");
-	
-	private static EV3TouchSensor leftBumper = new EV3TouchSensor(leftBumpPort);
-	private static EV3TouchSensor rightBumper = new EV3TouchSensor(rightBumpPort);
-	
-	private static SampleProvider leftTouch = leftBumper.getMode("Touch");
-	private static SampleProvider rightTouch = rightBumper.getMode("Touch");
-	
-	private static float[] leftSample = new float[leftTouch.sampleSize()];
-	private static float[] rightSample = new float[rightTouch.sampleSize()];
 	
 	private boolean mapFinished;
 	
@@ -76,7 +63,7 @@ public class Robot {
 
 	public static void main(String[] args) throws IOException{
 		new Robot();
-		current.startRobot();
+		current.startRobot(false);
 	}
 
 	public Robot() {
@@ -92,7 +79,8 @@ public class Robot {
 				"Booting..."
 		}, 0, 60, GraphicsLCD.LEFT, Font.getDefaultFont());
 		
-		colorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S2")), 16);
+		leftColorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S1")), 16);
+		rightColorSensor = new ColorSensorMonitor(this, new EV3ColorSensor(myEV3.getPort("S4")), 16);
 		localisation = new Localisation();
 		
 		NXTRegulatedMotor motor = null;
@@ -100,28 +88,30 @@ public class Robot {
 		
 		while(true){
 			try {
-				ultra = new EV3UltrasonicSensor(myEV3.getPort("S3"));
+				//ultra = new EV3UltrasonicSensor(myEV3.getPort("S3"));
 				motor = Motor.C;
 				break;
 			} catch(Exception e) {
 			}
 		}
 		
-		ultrasonicSensor = new UltrasonicSensorMonitor(this, 
+		/*ultrasonicSensor = new UltrasonicSensorMonitor(this, 
 				ultra, 
-				motor, 60);
+				motor, 60);*/
 
 		//screen.writeTo(new String[]{"Alive? "+(colorSensor != null)});
 
-		this.map = new Map(6, 7);
+		this.map = new Map(6, 6);
 
-		colorSensor.configure(true);
-		colorSensor.start();
+		leftColorSensor.configure(false); //Only need to configure once as it sets a static object
+		leftColorSensor.start();
+		
+		rightColorSensor.start();
+		
 		audio.start();
-		ultrasonicSensor.start();
 	}
 	
-	private void startRobot() {
+	private void startRobot(boolean useArbitrator) {
 		pilot = ChasConfig.getPilot();
 		pilot.setLinearSpeed(11);
 		
@@ -135,7 +125,11 @@ public class Robot {
 		
 		createKeyListeners();
 		
-		arbitrator.go();
+		if(useArbitrator){
+			arbitrator.go();
+		} else {
+			mainLoop();
+		}
 			
 	}
 	
@@ -184,67 +178,95 @@ public class Robot {
 		});
 	}
 
-	public void mainLoop(){}
+	public void mainLoop(){
+		pilot.rotate((Math.random()*25)-45);
+		pilot.forward();
+		
+		boolean foundblack = false;
+		ColorSensorMonitor onBlack, other;
+		
+		while(true){
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			screen.clearScreen();
+			screen.writeTo(new String[]{
+					"L: " + leftColorSensor.getColor(),
+					"R: " + rightColorSensor.getColor(),
+					"L: " + leftColorSensor.getBlueColor(),
+					"R: " + rightColorSensor.getBlueColor()
+			}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+			
+			if(leftColorSensor.getColor() == ColorNames.BLACK || rightColorSensor.getColor() == ColorNames.BLACK){
+				if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() != ColorNames.BLACK){
+					
+					if(!foundblack){
+						foundblack = true;
+						pilot.stop();
+					}
+					
+					screen.clearScreen();
+					screen.writeTo(new String[]{
+							"L: " + leftColorSensor.getColor(),
+							"R: " + rightColorSensor.getColor(),
+							"L: OnBlack: " + leftColorSensor.getBlueColor(),
+							"R: other: " + rightColorSensor.getBlueColor()
+					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+					
+					onBlack = leftColorSensor;
+					other = rightColorSensor;
+					
+					pilot.rotate(-5);
+					pilot.travel(0.5f);
+				} else if(leftColorSensor.getColor() != ColorNames.BLACK && rightColorSensor.getColor() == ColorNames.BLACK){
+					if(!foundblack){
+						foundblack = true;
+						pilot.stop();
+					}
+					
+					screen.clearScreen();
+					screen.writeTo(new String[]{
+							"L: " + leftColorSensor.getColor(),
+							"R: " + rightColorSensor.getColor(),
+							"L: other: " + leftColorSensor.getBlueColor(),
+							"R: OnBlack: " + rightColorSensor.getBlueColor()
+					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+					
+					other = leftColorSensor;
+					onBlack = rightColorSensor;
+					
+					pilot.rotate(5);
+					pilot.travel(0.5f);
+				} else if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() == ColorNames.BLACK){
+					pilot.stop();
+					
+					screen.clearScreen();
+					screen.writeTo(new String[]{
+							"L: " + leftColorSensor.getColor(),
+							"R: " + rightColorSensor.getColor(),
+							"L:" + leftColorSensor.getBlueColor(),
+							"R:" + rightColorSensor.getBlueColor(),
+							"Exited."
+					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+					
+					return; //return if localised
+				}
+			}
+		}
+		
+		
+	}
 	
 	public void observe(int heading){
-		ultrasonicSensor.clear();
-		try {
-			Thread.sleep(60*6);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		float F = ultrasonicSensor.getDistance();
-		try {
-			Thread.sleep(60*6);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		ultrasonicSensor.clear().rotate(90);
-		try {
-			Thread.sleep(60*6);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		float L = ultrasonicSensor.getDistance();
-		ultrasonicSensor.clear().rotate(-180);
-		try {
-			Thread.sleep(60*6);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		float R = ultrasonicSensor.getDistance();
-		
-		map.updateMap(heading, F, L, R);
-		ultrasonicSensor.resetMotor();	
 	}
 
 	public boolean MoveSquares(int i){
-		int direction = (i/Math.abs(i));
 		
-		
-		for (int j = 0; j < i; j++) {
-			if(direction == 1)
-				pilot.forward();
-			else
-				pilot.backward();
-			
-			
-			ColorNames cn;
-			do{
-				cn = colorSensor.getCurrentColor();
-				if(bothBumpersPressed()){
-					pilot.travel(-4.0f);
-					return false;
-				}
-			}while(cn != ColorNames.BLACK && !(pilot.getMovement().getDistanceTraveled() > 20f));
-			if(cn == ColorNames.BLACK){
-				pilot.travel(11.0f);
-			} else {
-				pilot.travel(5.0f);
-			}
-			localisation.decreasePosiConfidence();
-		}
-		return true;
+		//TODO Create Move Squares
+		return false;
 	}
 	
 	public void turnToHeading(int desiredHeading) {
@@ -279,6 +301,7 @@ public class Robot {
 		map.setRobotPos(map.getRobotX(), map.getRobotY(), desiredHeading);
 	}
 	
+	@Deprecated
 	public boolean bothBumpersPressed(){
 		SampleProvider leftTouch = Robot.current.getLeftTouch();
 		SampleProvider rightTouch = Robot.current.getRightTouch();
@@ -294,8 +317,9 @@ public class Robot {
 	}
 	
 	public boolean passedLine() {
-		ColorNames cn = Robot.current.getColorSensor().getCurrentColor();
-		if (cn == ColorNames.BLACK) {
+		ColorNames lcn = Robot.current.getLeftColorSensor().getCurrentColor();
+		ColorNames rcn = Robot.current.getRightColorSensor().getCurrentColor();
+		if (lcn == ColorNames.BLACK || rcn == ColorNames.BLACK) {
 			return true;
 		} else {
 			return false;
@@ -328,24 +352,32 @@ public class Robot {
 		return pilot;
 	}
 	
+	@Deprecated
 	public float[] getLeftSample() {
-		return leftSample;
+		return null;
 	}
 	
+	@Deprecated
 	public float[] getRightSample() {
-		return rightSample;
+		return null;
 	}
 	
+	@Deprecated
 	public SampleProvider getLeftTouch() {
-		return leftTouch;
+		return null;
 	}
 	
+	@Deprecated
 	public SampleProvider getRightTouch() {
-		return rightTouch;
+		return null;
 	}
 	
-	public ColorSensorMonitor getColorSensor() {
-		return colorSensor;
+	public ColorSensorMonitor getLeftColorSensor() {
+		return leftColorSensor;
+	}
+	
+	public ColorSensorMonitor getRightColorSensor() {
+		return rightColorSensor;
 	}
 	
 	public Localisation getLocalisation() {

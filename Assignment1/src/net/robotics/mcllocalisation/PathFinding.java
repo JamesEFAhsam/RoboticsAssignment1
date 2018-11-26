@@ -1,3 +1,5 @@
+package net.robotics.mcllocalisation;
+
 import lejos.robotics.RegulatedMotor; 
 import lejos.robotics.chassis.Chassis;
 import lejos.robotics.chassis.Wheel;
@@ -96,7 +98,7 @@ public class PathFinding {
 				
 				
 				
-				//System.out.println("Planning path…"); // displays as //the path is calculated
+				//System.out.println("Planning pathï¿½"); // displays as //the path is calculated
 				
 				//nav.goTo(12.5f, 160f); // goto the end location.
 				//nav.followPath();

@@ -35,22 +35,22 @@ public class ColorSensorMonitor extends Thread{
 	private HashMap<ColorNames, Integer> frequency;
 
 	public static enum ColorNames{
-		GREEN,
+		//GREEN,
 		WHITE,
 		BLACK,
 		BLUE,
-		YELLOW,
-		RED,
+		//YELLOW,
+		//RED,
 		UNKNOWN
 	}
 
 	private static final float[][] ColorRanges = {
-			{0.15f},
-			{0.15f},
+			//{0.15f},
+			{0.025f},
 			{0.05f},
-			{0.08f},
-			{0.05f, 0.05f, 0.1f},
-			{0.05f, 0.05f, 0.1f}
+			{0.025f, 0.025f, 0.01f}, //BLUE Colors
+			//{0.05f, 0.05f, 0.1f},
+			//{0.05f, 0.05f, 0.1f}
 	};
 
 	public ColorSensorMonitor(Robot robot, EV3ColorSensor sensor, int Delay){
