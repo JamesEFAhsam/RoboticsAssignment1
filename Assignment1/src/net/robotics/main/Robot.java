@@ -2,6 +2,7 @@ package net.robotics.main;
 
 
 import java.io.IOException;
+import java.util.Date;
 import java.io.File;
 import lejos.hardware.Audio;
 import lejos.hardware.Brick;
@@ -103,7 +104,7 @@ public class Robot {
 
 		this.map = new Map(6, 6);
 
-		leftColorSensor.configure(false); //Only need to configure once as it sets a static object
+		leftColorSensor.configure(true); //Only need to configure once as it sets a static object
 		leftColorSensor.start();
 		
 		rightColorSensor.start();
@@ -179,26 +180,36 @@ public class Robot {
 	}
 
 	public void mainLoop(){
-		pilot.rotate((Math.random()*25)-45);
+		pilot.rotate((Math.random()*15)-30);
+		
+		pilot.setLinearSpeed(5);
+		
 		pilot.forward();
 		
 		boolean foundblack = false;
 		ColorSensorMonitor onBlack, other;
+		long timeSince = new Date().getTime();
 		
 		while(true){
-			try {
-				Thread.sleep(100);
+			/*try {
+				Thread.sleep(0);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}*/
+			if(new Date().getTime() - timeSince > 200){
+				timeSince = new Date().getTime();
+				screen.clearScreen();
+				screen.writeTo(new String[]{
+						"L: " + leftColorSensor.getColor(),
+						"R: " + rightColorSensor.getColor(),
+						"LR: " + String.format("%.4f, %.4f", leftColorSensor.getRedColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHR()),
+						"LG: " + String.format("%.4f, %.4f", leftColorSensor.getGreenColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHG()),
+						"LB: " + String.format("%.4f, %.4f", leftColorSensor.getBlueColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHR()),
+						"RR: " + String.format("%.4f, %.4f", rightColorSensor.getRedColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLR()),
+						"RG: " + String.format("%.4f, %.4f", rightColorSensor.getGreenColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLG()),
+						"RB: " + String.format("%.4f, %.4f", rightColorSensor.getBlueColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLB()),
+				}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 			}
-			
-			screen.clearScreen();
-			screen.writeTo(new String[]{
-					"L: " + leftColorSensor.getColor(),
-					"R: " + rightColorSensor.getColor(),
-					"L: " + leftColorSensor.getBlueColor(),
-					"R: " + rightColorSensor.getBlueColor()
-			}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
 			
 			if(leftColorSensor.getColor() == ColorNames.BLACK || rightColorSensor.getColor() == ColorNames.BLACK){
 				if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() != ColorNames.BLACK){
@@ -207,14 +218,6 @@ public class Robot {
 						foundblack = true;
 						pilot.stop();
 					}
-					
-					screen.clearScreen();
-					screen.writeTo(new String[]{
-							"L: " + leftColorSensor.getColor(),
-							"R: " + rightColorSensor.getColor(),
-							"L: OnBlack: " + leftColorSensor.getBlueColor(),
-							"R: other: " + rightColorSensor.getBlueColor()
-					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
 					
 					onBlack = leftColorSensor;
 					other = rightColorSensor;
@@ -227,14 +230,6 @@ public class Robot {
 						pilot.stop();
 					}
 					
-					screen.clearScreen();
-					screen.writeTo(new String[]{
-							"L: " + leftColorSensor.getColor(),
-							"R: " + rightColorSensor.getColor(),
-							"L: other: " + leftColorSensor.getBlueColor(),
-							"R: OnBlack: " + rightColorSensor.getBlueColor()
-					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
-					
 					other = leftColorSensor;
 					onBlack = rightColorSensor;
 					
@@ -242,15 +237,19 @@ public class Robot {
 					pilot.travel(0.5f);
 				} else if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() == ColorNames.BLACK){
 					pilot.stop();
-					
+
 					screen.clearScreen();
 					screen.writeTo(new String[]{
 							"L: " + leftColorSensor.getColor(),
 							"R: " + rightColorSensor.getColor(),
-							"L:" + leftColorSensor.getBlueColor(),
-							"R:" + rightColorSensor.getBlueColor(),
+							"LR: " + String.format("%.4f, %.4f", leftColorSensor.getRedColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHR()),
+							"LG: " + String.format("%.4f, %.4f", leftColorSensor.getGreenColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHG()),
+							"LB: " + String.format("%.4f, %.4f", leftColorSensor.getBlueColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getHR()),
+							"RR: " + String.format("%.4f, %.4f", rightColorSensor.getRedColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLR()),
+							"RG: " + String.format("%.4f, %.4f", rightColorSensor.getGreenColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLG()),
+							"RB: " + String.format("%.4f, %.4f", rightColorSensor.getBlueColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLB()),
 							"Exited."
-					}, 0, 0, GraphicsLCD.LEFT, Font.getDefaultFont());
+					}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 					
 					return; //return if localised
 				}

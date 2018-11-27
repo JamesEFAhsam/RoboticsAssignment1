@@ -36,9 +36,10 @@ public class ColorSensorMonitor extends Thread{
 
 	public static enum ColorNames{
 		//GREEN,
-		WHITE,
-		BLACK,
+
 		BLUE,
+		BLACK,
+		WHITE,
 		//YELLOW,
 		//RED,
 		UNKNOWN
@@ -46,9 +47,9 @@ public class ColorSensorMonitor extends Thread{
 
 	private static final float[][] ColorRanges = {
 			//{0.15f},
-			{0.025f},
-			{0.05f},
-			{0.025f, 0.025f, 0.01f}, //BLUE Colors
+			{0.005f, 0.005f, 0.01f}, //BLUE Colors
+			{0.2f},
+			{0.2f}
 			//{0.05f, 0.05f, 0.1f},
 			//{0.05f, 0.05f, 0.1f}
 	};
@@ -301,6 +302,10 @@ public class ColorSensorMonitor extends Thread{
 
 	public HashMap<ColorNames, Integer> getColorFrequency(){
 		return frequency;
+	}
+	
+	public static RGBFloat getColorRanges(ColorNames name){
+		return ColorKeys.get(name);
 	}
 
 	public ColorNames getColor(){
