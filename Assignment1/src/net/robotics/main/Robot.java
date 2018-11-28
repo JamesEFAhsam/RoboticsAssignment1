@@ -182,21 +182,17 @@ public class Robot {
 	public void mainLoop(){
 		pilot.rotate((Math.random()*15)-30);
 		
-		pilot.setLinearSpeed(5);
-		
-		pilot.forward();
+		pilot.setLinearSpeed(4);
+		pilot.setLinearAcceleration(3);
+		pilot.setAngularSpeed(40);
+		pilot.setAngularAcceleration(30);
 		
 		boolean foundblack = false;
 		ColorSensorMonitor onBlack, other;
 		long timeSince = new Date().getTime();
 		
 		while(true){
-			/*try {
-				Thread.sleep(0);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}*/
-			if(new Date().getTime() - timeSince > 200){
+			/*if(new Date().getTime() - timeSince > 200){
 				timeSince = new Date().getTime();
 				screen.clearScreen();
 				screen.writeTo(new String[]{
@@ -209,7 +205,7 @@ public class Robot {
 						"RG: " + String.format("%.4f, %.4f", rightColorSensor.getGreenColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLG()),
 						"RB: " + String.format("%.4f, %.4f", rightColorSensor.getBlueColor(), ColorSensorMonitor.getColorRanges(ColorNames.BLACK).getLB()),
 				}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
-			}
+			}*/
 			
 			if(leftColorSensor.getColor() == ColorNames.BLACK || rightColorSensor.getColor() == ColorNames.BLACK){
 				if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() != ColorNames.BLACK){
@@ -222,8 +218,8 @@ public class Robot {
 					onBlack = leftColorSensor;
 					other = rightColorSensor;
 					
-					pilot.rotate(-5);
-					pilot.travel(0.5f);
+					pilot.rotate(-4);
+					pilot.travel(0.1f);
 				} else if(leftColorSensor.getColor() != ColorNames.BLACK && rightColorSensor.getColor() == ColorNames.BLACK){
 					if(!foundblack){
 						foundblack = true;
@@ -233,8 +229,8 @@ public class Robot {
 					other = leftColorSensor;
 					onBlack = rightColorSensor;
 					
-					pilot.rotate(5);
-					pilot.travel(0.5f);
+					pilot.rotate(4);
+					pilot.travel(0.1f);
 				} else if(leftColorSensor.getColor() == ColorNames.BLACK && rightColorSensor.getColor() == ColorNames.BLACK){
 					pilot.stop();
 
@@ -251,12 +247,16 @@ public class Robot {
 							"Exited."
 					}, 0, 0, GraphicsLCD.LEFT, Font.getSmallFont());
 					
-					return; //return if localised
+					break; //return if localised
 				}
+			} else {
+				pilot.travel(3);
 			}
+			
+			
 		}
 		
-		
+		pilot.travel(-6);
 	}
 	
 	public void observe(int heading){

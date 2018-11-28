@@ -33,6 +33,8 @@ public class ColorSensorMonitor extends Thread{
 	private LinkedList<ColorNames> pastStrings;
 	private ColorNames currentColor;
 	private HashMap<ColorNames, Integer> frequency;
+	
+	private static final int MeasurementAmount = 16;
 
 	public static enum ColorNames{
 		//GREEN,
@@ -204,7 +206,7 @@ public class ColorSensorMonitor extends Thread{
 
 
 		while(true){
-			if(pastStrings.size() < 8){
+			if(pastStrings.size() < MeasurementAmount){
 				currentColor = ColorNames.UNKNOWN;
 
 				ColorNames key = getColor();
