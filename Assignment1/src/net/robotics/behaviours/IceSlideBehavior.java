@@ -23,7 +23,7 @@ public class IceSlideBehavior implements Behavior{
 	private boolean visitOverride = false;
 
 	public IceSlideBehavior () {
-		colorSensor = Robot.current.getColorSensor();
+		//colorSensor = Robot.current.getColorSensor();
 		pilot = Robot.current.getPilot();
 		map = Robot.current.getMap();
 	}

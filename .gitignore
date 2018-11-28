@@ -8,3 +8,11 @@ Assignment1/MoveByColor.jar
 Assignment1/Robot.jar
 
 Assignment1/ChasConfig.jar
+
+.metadata/*
+
+.recommenders/*
+
+Assignment1/.metadata/*
+
+Assignment1/.recommenders/*
